@@ -3,6 +3,7 @@
 **All-in-one command center for software teams** — projects, tasks, issues and people
 behind a single bird's-eye dashboard.
 
+![CI](https://github.com/pallab-js/zenith/actions/workflows/ci.yml/badge.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-teal)
