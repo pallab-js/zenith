@@ -4,6 +4,7 @@ import { useState } from "react";
 import { saveProject } from "@/lib/actions";
 import { projectInputSchema, type ProjectForm } from "@/lib/schemas";
 import type { Project, User } from "@/lib/repo/types";
+import { toDateOnly } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
@@ -15,8 +16,8 @@ const EMPTY: ProjectForm = {
   description: "",
   status: "planning",
   leadId: "",
-  startDate: new Date().toISOString().slice(0, 10),
-  targetDate: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+  startDate: toDateOnly(),
+  targetDate: toDateOnly(new Date(Date.now() + 30 * 86400000)),
 };
 
 export function ProjectFormModal({

@@ -8,12 +8,14 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Panel } from "@/components/ui/panel";
 import { ProgressBar } from "@/components/ui/progress";
 import { computeProjectStats, PROJECT_STATUS_LABEL } from "@/lib/metrics";
-import { store } from "@/lib/repo/in-memory";
+import { store } from "@/lib/repo";
+import { getSession } from "@/lib/server/session";
 import { formatShortDate, isOverdue } from "@/lib/utils";
 
 export const metadata = { title: "Projects" };
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const session = await getSession();
   const users = store.getUsers();
   const projects = store.getProjects();
   const stats = computeProjectStats(
@@ -21,7 +23,7 @@ export default function ProjectsPage() {
     store.getTasks(),
     store.getIssues(),
   );
-  const role = store.getRole(store.db.currentUserId);
+  const role = session.role;
 
   return (
     <div className="space-y-7">
@@ -34,7 +36,7 @@ export default function ProjectsPage() {
             <ProjectActions
               users={users}
               role={role}
-              defaultLeadId={store.db.currentUserId}
+              defaultLeadId={session.userId}
             />
           ) : undefined
         }
@@ -48,7 +50,7 @@ export default function ProjectsPage() {
             <ProjectActions
               users={users}
               role={role}
-              defaultLeadId={store.db.currentUserId}
+              defaultLeadId={session.userId}
             />
           }
         />

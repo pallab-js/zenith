@@ -21,7 +21,8 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Table, TD, TH, THead, TR } from "@/components/ui/table";
 import { buildDashboardData, PROJECT_STATUS_LABEL } from "@/lib/metrics";
 import { can } from "@/lib/permissions";
-import { store } from "@/lib/repo/in-memory";
+import { store } from "@/lib/repo";
+import { getSession } from "@/lib/server/session";
 import { relativeTime } from "@/lib/utils";
 
 export const metadata = { title: "Dashboard" };
@@ -38,8 +39,17 @@ const VERB_COPY: Record<string, string> = {
   linked: "linked tasks to",
 };
 
-export default function DashboardPage() {
-  const data = buildDashboardData(store.db);
+export default async function DashboardPage() {
+  const session = await getSession();
+  const data = buildDashboardData({
+    users: store.getUsers(),
+    memberships: store.getMemberships(),
+    projects: store.getProjects(),
+    tasks: store.getTasks(),
+    issues: store.getIssues(),
+    activity: store.getActivity(200),
+    currentUserId: session.userId,
+  });
   const { stats, projectStats, projects, users, activity } = data;
   const writable = can(data.role, "task:write");
 
@@ -233,7 +243,7 @@ export default function DashboardPage() {
             />
           ) : (
             <ol className="space-y-0.5">
-              {activity.slice(0, 12).map((a) => {
+              {activity.slice(0, 15).map((a) => {
                 const actor = users.find((u) => u.id === a.actorId);
                 return (
                   <li

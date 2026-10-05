@@ -53,6 +53,15 @@ const users: User[] = [
     title: "QA & Release",
     avatarColor: "var(--color-primary-soft)",
   },
+  {
+    // The spec's Stakeholder persona (spec.md §2, US-5) — read-only seat, so
+    // the viewer role is selectable without demoting a working member first.
+    id: "usr_noor",
+    name: "Noor Haddad",
+    email: "noor@zenith.dev",
+    title: "Product Manager",
+    avatarColor: "var(--color-magenta)",
+  },
 ];
 
 const memberships = [
@@ -62,6 +71,7 @@ const memberships = [
   { userId: "usr_sana", role: "member" as const },
   { userId: "usr_leo", role: "member" as const },
   { userId: "usr_priya", role: "member" as const },
+  { userId: "usr_noor", role: "viewer" as const },
 ];
 
 /* ── Projects ─────────────────────────────────────────────── */
@@ -265,14 +275,13 @@ export function buildSeed(): DBShape {
   const activity = buildActivity(tasks, issues, createdAt);
 
   return {
-    users,
+    users: users.map((u) => ({ ...u })),
     memberships: memberships.map((m) => ({ ...m })),
     projects: projects.map((p) => ({ ...p })),
     tasks,
     issues,
     comments: [],
     activity,
-    currentUserId: "usr_avery",
   };
 }
 

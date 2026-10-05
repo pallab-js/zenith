@@ -10,8 +10,9 @@ import {
   computeProjectStats,
 } from "@/lib/metrics";
 import { can } from "@/lib/permissions";
-import { store } from "@/lib/repo/in-memory";
-import { cn, formatShortDate, isOverdue } from "@/lib/utils";
+import { store } from "@/lib/repo";
+import { getSession } from "@/lib/server/session";
+import { cn, formatShortDate, isOverdue, toDate } from "@/lib/utils";
 
 export const metadata = { title: "Project" };
 
@@ -24,10 +25,11 @@ export default async function ProjectDetailPage({
   const project = store.getProject(id);
   if (!project) notFound();
 
+  const session = await getSession();
   const tasks = store.getTasks().filter((t) => t.projectId === id);
   const issues = store.getIssues().filter((i) => i.projectId === id);
   const users = store.getUsers();
-  const role = store.getRole(store.db.currentUserId);
+  const role = session.role;
 
   const stats = computeProjectStats([project], store.getTasks(), store.getIssues())[0];
   const lead = users.find((u) => u.id === project.leadId);
@@ -36,9 +38,7 @@ export default async function ProjectDetailPage({
 
   const elapsed = Math.max(
     1,
-    Math.round(
-      (+new Date() - +new Date(project.startDate)) / 86400000,
-    ),
+    Math.round((+new Date() - +(toDate(project.startDate) ?? new Date())) / 86400000),
   );
 
   const activity = store

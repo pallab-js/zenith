@@ -2,11 +2,14 @@ import { Suspense } from "react";
 import { IssuesWorkspace } from "@/components/issues/issues-workspace";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
-import { store } from "@/lib/repo/in-memory";
+import { store } from "@/lib/repo";
+import { getSession } from "@/lib/server/session";
 
 export const metadata = { title: "Issues" };
 
-export default function IssuesPage() {
+export default async function IssuesPage() {
+  const session = await getSession();
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -20,7 +23,7 @@ export default function IssuesPage() {
           tasks={store.getTasks()}
           projects={store.getProjects()}
           users={store.getUsers()}
-          role={store.getRole(store.db.currentUserId)}
+          role={session.role}
         />
       </Suspense>
     </div>

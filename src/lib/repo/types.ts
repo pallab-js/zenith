@@ -1,7 +1,17 @@
 /**
- * Repository seam (plan.md §1, constitution §V).
- * UI and server actions depend ONLY on these interfaces. Swapping the in-memory
- * adapter for Postgres/Drizzle means adding one file — nothing else changes.
+ * Repository seam (plan.md §5, constitution §V).
+ *
+ * UI, server actions and the service layer depend ONLY on these interfaces.
+ * Nothing outside `src/lib/repo` knows which adapter is behind them — swap
+ * the SQLite adapter for Postgres by implementing `Store` in a new file and
+ * changing one line in `src/lib/repo/index.ts`.
+ *
+ * Sealed on purpose:
+ *  - there is no `db: DBShape` escape hatch, so callers cannot depend on the
+ *    adapter's storage shape (a SQL adapter would otherwise have to
+ *    materialise the whole database in memory to satisfy it);
+ *  - mutations take an explicit `actorId`, so the store never holds session
+ *    state and can be driven from tests without a Next.js request.
  */
 
 export type Role = "owner" | "admin" | "member" | "viewer";
@@ -101,6 +111,16 @@ export interface ActivityEvent {
   at: string;
 }
 
+/** A member with the role they hold in this workspace. */
+export interface Member {
+  user: User;
+  role: Role;
+}
+
+/**
+ * Adapter-internal row bundle. Not part of the public seam — it exists so
+ * `buildSeed()` can hand the same data to whichever adapter is active.
+ */
 export interface DBShape {
   users: User[];
   memberships: Membership[];
@@ -109,23 +129,23 @@ export interface DBShape {
   issues: Issue[];
   comments: Comment[];
   activity: ActivityEvent[];
-  /** Mock session: currently signed-in user id. */
-  currentUserId: string;
 }
 
 /* ── Read API ─────────────────────────────────────────────── */
 
 export interface Repo {
-  readonly db: DBShape;
-  getUser(id: string): User | undefined;
   getUsers(): User[];
+  getUser(id: string): User | undefined;
+  getMemberships(): Membership[];
+  /** Members in workspace order (membership order), never `undefined`. */
+  getMembers(): Member[];
   getRole(userId: string): Role;
-  getProject(id: string): Project | undefined;
   getProjects(): Project[];
-  getTask(id: string): Task | undefined;
+  getProject(id: string): Project | undefined;
   getTasks(): Task[];
-  getIssue(id: string): Issue | undefined;
+  getTask(id: string): Task | undefined;
   getIssues(): Issue[];
+  getIssue(id: string): Issue | undefined;
   getComments(taskId: string): Comment[];
   getActivity(limit?: number): ActivityEvent[];
 }
@@ -163,20 +183,24 @@ export interface IssueInput {
   linkedTaskIds: string[];
 }
 
+/**
+ * The only write path. Every mutation takes the acting user's id first —
+ * authorization is the service layer's job, provenance is the store's.
+ */
 export interface Store extends Repo {
-  createProject(input: ProjectInput): Project;
-  updateProject(id: string, input: ProjectInput): Project;
-  createTask(input: TaskInput): Task;
-  updateTask(id: string, input: TaskInput): Task;
-  moveTask(id: string, status: TaskStatus, order: number): Task;
-  deleteTask(id: string): void;
-  createIssue(input: IssueInput): Issue;
-  updateIssue(id: string, input: IssueInput): Issue;
-  linkIssueTasks(issueId: string, taskIds: string[]): Issue;
-  deleteIssue(id: string): void;
-  createComment(taskId: string, body: string, authorId: string): Comment;
-  setRole(userId: string, role: Role): void;
-  removeMember(userId: string): void;
-  setCurrentUser(userId: string): void;
+  createProject(actorId: string, input: ProjectInput): Project;
+  updateProject(actorId: string, id: string, input: ProjectInput): Project;
+  createTask(actorId: string, input: TaskInput): Task;
+  updateTask(actorId: string, id: string, input: TaskInput): Task;
+  moveTask(actorId: string, id: string, status: TaskStatus, order: number): Task;
+  deleteTask(actorId: string, id: string): void;
+  createIssue(actorId: string, input: IssueInput): Issue;
+  updateIssue(actorId: string, id: string, input: IssueInput): Issue;
+  linkIssueTasks(actorId: string, issueId: string, taskIds: string[]): Issue;
+  deleteIssue(actorId: string, id: string): void;
+  createComment(actorId: string, taskId: string, body: string): Comment;
+  setRole(actorId: string, userId: string, role: Role): void;
+  removeMember(actorId: string, userId: string): void;
+  /** Restore the seed data (demo escape hatch). */
   reset(): void;
 }

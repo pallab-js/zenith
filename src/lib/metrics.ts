@@ -6,6 +6,7 @@ import type {
   Task,
   User,
 } from "@/lib/repo/types";
+import { isOverdue } from "@/lib/utils";
 
 export interface ProjectStats {
   projectId: string;
@@ -125,10 +126,7 @@ export function computeProjectStats(
     const open = pt.length - done;
     const pi = issues.filter((i) => i.projectId === p.id && i.status !== "resolved");
     const overdue = pt.filter(
-      (t) =>
-        t.status !== "done" &&
-        t.dueDate &&
-        new Date(t.dueDate) < new Date(new Date().toDateString()),
+      (t) => t.status !== "done" && isOverdue(t.dueDate),
     ).length;
     const critical = pi.filter((i) => i.severity === "critical").length;
     const progress = pt.length === 0 ? 0 : Math.round((done / pt.length) * 100);
@@ -160,9 +158,7 @@ export function computeMemberStats(
   return userIds.map((userId) => {
     const mine = tasks.filter((t) => t.assigneeId === userId);
     const open = mine.filter((t) => t.status !== "done");
-    const overdue = open.filter(
-      (t) => t.dueDate && new Date(t.dueDate) < new Date(new Date().toDateString()),
-    );
+    const overdue = open.filter((t) => isOverdue(t.dueDate));
     const activeIssues = issues.filter(
       (i) => i.assigneeId === userId && i.status !== "resolved",
     );
@@ -204,10 +200,7 @@ export function buildDashboardData(db: {
   const denom = projectStats.length - finished;
   const onTrackPct = denom <= 0 ? 100 : Math.round((onTrack / denom) * 100);
   const overdue = tasks.filter(
-    (t) =>
-      t.status !== "done" &&
-      t.dueDate &&
-      new Date(t.dueDate) < new Date(new Date().toDateString()),
+    (t) => t.status !== "done" && isOverdue(t.dueDate),
   ).length;
 
   const statusCounts = STATUS_ORDER.map((s) => ({

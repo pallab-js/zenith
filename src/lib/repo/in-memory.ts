@@ -1,23 +1,22 @@
-import { buildSeed } from "@/lib/seed";
+import { ACTIVITY_LIMIT, activity, type NewActivity } from "@/lib/repo/events";
 import type {
-  ActivityEvent,
-  ActivityVerb,
   Comment,
   DBShape,
   Issue,
+  Member,
   Project,
   Store,
   Task,
 } from "@/lib/repo/types";
+import { buildSeed } from "@/lib/seed";
 import { makeId } from "@/lib/utils";
 
 /**
- * In-memory adapter (v1). The store lives on `globalThis` so every route
- * handler, server action and RSC render shares one instance across HMR.
- * State resets when the server process restarts — documented in README.
+ * In-memory adapter (tests / `ZENITH_REPO=memory`).
  *
- * Swap point: implement `Store` against Postgres/Drizzle in a new file;
- * nothing outside `lib/repo` needs to change (constitution §V).
+ * The store lives on `globalThis` so every route handler, server action and
+ * RSC render shares one instance across HMR. State resets when the server
+ * process restarts — the SQLite adapter is the persistent default.
  */
 
 declare global {
@@ -29,52 +28,56 @@ function ensure(): DBShape {
   return globalThis.__zenithStore;
 }
 
-function logActivity(
-  db: DBShape,
-  event: Omit<ActivityEvent, "id"> & { verb: ActivityVerb },
-) {
+function log(db: DBShape, event: NewActivity): void {
   db.activity.unshift({ ...event, id: makeId("act") });
-  if (db.activity.length > 200) db.activity.length = 200;
+  if (db.activity.length > ACTIVITY_LIMIT) db.activity.length = ACTIVITY_LIMIT;
 }
 
-function actor(db: DBShape): string {
-  return db.currentUserId;
+function memberName(db: DBShape, userId: string | null): string | undefined {
+  if (!userId) return undefined;
+  return db.users.find((u) => u.id === userId)?.name;
 }
 
-export function createStore(): Store {
+export function createInMemoryStore(): Store {
   const repo: Store = {
-    get db() {
-      return ensure();
+    getUsers() {
+      return ensure().users;
     },
-
     getUser(id) {
       return ensure().users.find((u) => u.id === id);
     },
-    getUsers() {
-      return ensure().users;
+    getMemberships() {
+      return ensure().memberships;
+    },
+    getMembers() {
+      const db = ensure();
+      return db.memberships.flatMap<Member>((m) => {
+        const user = db.users.find((u) => u.id === m.userId);
+        return user ? [{ user, role: m.role }] : [];
+      });
     },
     getRole(userId) {
       return (
         ensure().memberships.find((m) => m.userId === userId)?.role ?? "viewer"
       );
     },
-    getProject(id) {
-      return ensure().projects.find((p) => p.id === id);
-    },
     getProjects() {
       return ensure().projects;
     },
-    getTask(id) {
-      return ensure().tasks.find((t) => t.id === id);
+    getProject(id) {
+      return ensure().projects.find((p) => p.id === id);
     },
     getTasks() {
       return ensure().tasks;
     },
-    getIssue(id) {
-      return ensure().issues.find((i) => i.id === id);
+    getTask(id) {
+      return ensure().tasks.find((t) => t.id === id);
     },
     getIssues() {
       return ensure().issues;
+    },
+    getIssue(id) {
+      return ensure().issues.find((i) => i.id === id);
     },
     getComments(taskId) {
       return ensure().comments.filter((c) => c.taskId === taskId);
@@ -83,42 +86,25 @@ export function createStore(): Store {
       return ensure().activity.slice(0, limit);
     },
 
-    createProject(input) {
+    createProject(actorId, input) {
       const db = ensure();
       const now = new Date().toISOString();
       const project: Project = { id: makeId("prj"), ...input, createdAt: now };
       db.projects.unshift(project);
-      logActivity(db, {
-        actorId: actor(db),
-        verb: "created",
-        entityType: "project",
-        entityId: project.id,
-        entityLabel: project.name,
-        meta: project.status.replace("_", " "),
-        at: now,
-      });
+      log(db, activity.projectCreated(actorId, project, now));
       return project;
     },
 
-    updateProject(id, input) {
+    updateProject(actorId, id, input) {
       const db = ensure();
       const idx = db.projects.findIndex((p) => p.id === id);
       if (idx < 0) throw new Error("Project not found");
-      const prev = db.projects[idx];
-      db.projects[idx] = { ...prev, ...input };
-      logActivity(db, {
-        actorId: actor(db),
-        verb: "updated",
-        entityType: "project",
-        entityId: id,
-        entityLabel: input.name,
-        meta: input.status.replace("_", " "),
-        at: new Date().toISOString(),
-      });
+      db.projects[idx] = { ...db.projects[idx], ...input };
+      log(db, activity.projectUpdated(actorId, id, input.name, input.status));
       return db.projects[idx];
     },
 
-    createTask(input) {
+    createTask(actorId, input) {
       const db = ensure();
       const now = new Date().toISOString();
       const task: Task = {
@@ -129,64 +115,36 @@ export function createStore(): Store {
         updatedAt: now,
       };
       db.tasks.unshift(task);
-      logActivity(db, {
-        actorId: actor(db),
-        verb: "created",
-        entityType: "task",
-        entityId: task.id,
-        entityLabel: task.title,
-        meta: task.status.replace("_", " "),
-        at: now,
-      });
+      log(db, activity.taskCreated(actorId, task, now));
       return task;
     },
 
-    updateTask(id, input) {
+    updateTask(actorId, id, input) {
       const db = ensure();
       const idx = db.tasks.findIndex((t) => t.id === id);
       if (idx < 0) throw new Error("Task not found");
       const prev = db.tasks[idx];
-      const next: Task = {
-        ...prev,
-        ...input,
-        updatedAt: new Date().toISOString(),
-      };
+      const next: Task = { ...prev, ...input, updatedAt: new Date().toISOString() };
       db.tasks[idx] = next;
-      logActivity(db, {
-        actorId: actor(db),
-        verb: input.assigneeId && input.assigneeId !== prev.assigneeId ? "assigned" : "updated",
-        entityType: "task",
-        entityId: id,
-        entityLabel: next.title,
-        meta: next.assigneeId
-          ? (db.users.find((u) => u.id === next.assigneeId)?.name ?? "")
-          : next.status.replace("_", " "),
-        at: next.updatedAt,
-      });
+      log(
+        db,
+        activity.taskUpdated(actorId, prev, next, memberName(db, next.assigneeId)),
+      );
       return next;
     },
 
-    moveTask(id, status, order) {
+    moveTask(actorId, id, status, order) {
       const db = ensure();
       const idx = db.tasks.findIndex((t) => t.id === id);
       if (idx < 0) throw new Error("Task not found");
       const now = new Date().toISOString();
-      const prev = db.tasks[idx];
-      const next: Task = { ...prev, status, order, updatedAt: now };
+      const next: Task = { ...db.tasks[idx], status, order, updatedAt: now };
       db.tasks[idx] = next;
-      logActivity(db, {
-        actorId: actor(db),
-        verb: "moved",
-        entityType: "task",
-        entityId: id,
-        entityLabel: next.title,
-        meta: status.replace("_", " "),
-        at: now,
-      });
+      log(db, activity.taskMoved(actorId, next, now));
       return next;
     },
 
-    deleteTask(id) {
+    deleteTask(actorId, id) {
       const db = ensure();
       const task = db.tasks.find((t) => t.id === id);
       if (!task) return;
@@ -194,17 +152,10 @@ export function createStore(): Store {
       db.issues.forEach((iss) => {
         iss.linkedTaskIds = iss.linkedTaskIds.filter((tid) => tid !== id);
       });
-      logActivity(db, {
-        actorId: actor(db),
-        verb: "closed",
-        entityType: "task",
-        entityId: id,
-        entityLabel: task.title,
-        at: new Date().toISOString(),
-      });
+      log(db, activity.taskDeleted(actorId, task));
     },
 
-    createIssue(input) {
+    createIssue(actorId, input) {
       const db = ensure();
       const now = new Date().toISOString();
       const project = db.projects.find((p) => p.id === input.projectId);
@@ -213,24 +164,16 @@ export function createStore(): Store {
         id: makeId("iss"),
         key: `${project?.key ?? "GEN"}-${100 + count}`,
         ...input,
-        reporterId: actor(db),
+        reporterId: actorId,
         createdAt: now,
         resolvedAt: input.status === "resolved" ? now : null,
       };
       db.issues.unshift(issue);
-      logActivity(db, {
-        actorId: actor(db),
-        verb: "created",
-        entityType: "issue",
-        entityId: issue.id,
-        entityLabel: `${issue.key} ${issue.title}`,
-        meta: issue.severity,
-        at: now,
-      });
+      log(db, activity.issueCreated(actorId, issue, now));
       return issue;
     },
 
-    updateIssue(id, input) {
+    updateIssue(actorId, id, input) {
       const db = ensure();
       const idx = db.issues.findIndex((i) => i.id === id);
       if (idx < 0) throw new Error("Issue not found");
@@ -243,112 +186,67 @@ export function createStore(): Store {
           input.status === "resolved" ? (prev.resolvedAt ?? now) : null,
       };
       db.issues[idx] = next;
-      const verb: ActivityVerb =
-        input.status === "resolved" && prev.status !== "resolved"
-          ? "resolved"
-          : input.status !== "resolved" && prev.status === "resolved"
-            ? "reopened"
-            : "updated";
-      logActivity(db, {
-        actorId: actor(db),
-        verb,
-        entityType: "issue",
-        entityId: id,
-        entityLabel: `${next.key} ${next.title}`,
-        meta: next.severity,
-        at: now,
-      });
+      log(db, activity.issueUpdated(actorId, prev.status, next, now));
       return next;
     },
 
-    linkIssueTasks(issueId, taskIds) {
+    linkIssueTasks(actorId, issueId, taskIds) {
       const db = ensure();
       const idx = db.issues.findIndex((i) => i.id === issueId);
       if (idx < 0) throw new Error("Issue not found");
       db.issues[idx].linkedTaskIds = taskIds;
-      logActivity(db, {
-        actorId: actor(db),
-        verb: "linked",
-        entityType: "issue",
-        entityId: issueId,
-        entityLabel: `${db.issues[idx].key} ${db.issues[idx].title}`,
-        meta: `${taskIds.length} task${taskIds.length === 1 ? "" : "s"}`,
-        at: new Date().toISOString(),
-      });
+      log(db, activity.issueLinked(actorId, db.issues[idx], taskIds.length));
       return db.issues[idx];
     },
 
-    deleteIssue(id) {
+    deleteIssue(actorId, id) {
       const db = ensure();
       const issue = db.issues.find((i) => i.id === id);
       if (!issue) return;
       db.issues = db.issues.filter((i) => i.id !== id);
-      logActivity(db, {
-        actorId: actor(db),
-        verb: "closed",
-        entityType: "issue",
-        entityId: id,
-        entityLabel: `${issue.key} ${issue.title}`,
-        at: new Date().toISOString(),
-      });
+      log(db, activity.issueDeleted(actorId, issue));
     },
 
-    createComment(taskId, body, authorId) {
+    createComment(actorId, taskId, body) {
       const db = ensure();
       const comment: Comment = {
         id: makeId("cmt"),
         taskId,
-        authorId,
+        authorId: actorId,
         body,
         createdAt: new Date().toISOString(),
       };
       db.comments.push(comment);
       const task = db.tasks.find((t) => t.id === taskId);
-      logActivity(db, {
-        actorId: authorId,
-        verb: "commented",
-        entityType: "task",
-        entityId: taskId,
-        entityLabel: task?.title ?? taskId,
-        at: comment.createdAt,
-      });
+      log(
+        db,
+        activity.commentCreated(actorId, taskId, task?.title ?? taskId, comment.createdAt),
+      );
       return comment;
     },
 
-    setRole(userId, role) {
+    setRole(actorId, userId, role) {
       const db = ensure();
-      const m = db.memberships.find((x) => x.userId === userId);
-      if (!m) throw new Error("Member not found");
-      m.role = role;
-      logActivity(db, {
-        actorId: actor(db),
-        verb: "updated",
-        entityType: "member",
-        entityId: userId,
-        entityLabel: db.users.find((u) => u.id === userId)?.name ?? userId,
-        meta: `role → ${role}`,
-        at: new Date().toISOString(),
-      });
+      const membership = db.memberships.find((m) => m.userId === userId);
+      if (!membership) throw new Error("Member not found");
+      membership.role = role;
+      log(
+        db,
+        activity.roleChanged(actorId, userId, memberName(db, userId) ?? userId, role),
+      );
     },
 
-    removeMember(userId) {
+    removeMember(actorId, userId) {
       const db = ensure();
+      if (!db.memberships.some((m) => m.userId === userId)) {
+        throw new Error("Member not found");
+      }
+      const name = memberName(db, userId) ?? userId;
       db.memberships = db.memberships.filter((m) => m.userId !== userId);
       db.tasks.forEach((t) => {
         if (t.assigneeId === userId) t.assigneeId = null;
       });
-      logActivity(db, {
-        actorId: actor(db),
-        verb: "closed",
-        entityType: "member",
-        entityId: userId,
-        entityLabel: db.users.find((u) => u.id === userId)?.name ?? userId,
-        at: new Date().toISOString(),
-      });
-    },
-
-    setCurrentUser(userId) {
-      ensure().currentUserId = userId;
+      log(db, activity.memberRemoved(actorId, userId, name));
     },
 
     reset() {
@@ -358,6 +256,3 @@ export function createStore(): Store {
 
   return repo;
 }
-
-/** Singleton used by server actions and RSC pages. */
-export const store: Store = createStore();

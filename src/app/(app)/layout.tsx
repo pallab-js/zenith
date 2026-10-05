@@ -1,21 +1,18 @@
 import { AppShell } from "@/components/shell/app-shell";
-import { store } from "@/lib/repo/in-memory";
+import { store } from "@/lib/repo";
+import { getSession } from "@/lib/server/session";
 
-/** The in-memory store is mutable server state — never prerender these pages. */
+/** Mutable server state (SQLite) — never prerender these pages. */
 export const dynamic = "force-dynamic";
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const db = store.db;
-  const members = db.memberships.map((m) => ({
-    user: store.getUser(m.userId)!,
-    role: m.role,
-  }));
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession();
 
   return (
     <AppShell
-      members={members}
-      currentUser={store.getUser(db.currentUserId) ?? members[0].user}
-      role={store.getRole(db.currentUserId)}
+      members={store.getMembers()}
+      currentUser={session.user}
+      role={session.role}
       projects={store.getProjects()}
       tasks={store.getTasks()}
       issues={store.getIssues()}

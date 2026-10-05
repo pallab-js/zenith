@@ -4,7 +4,8 @@ import { Panel, PanelHeader } from "@/components/ui/panel";
 import { computeMemberStats, type MemberStats } from "@/lib/metrics";
 import { ROLE_DESCRIPTION, ROLE_LABEL } from "@/lib/permissions";
 import type { Role } from "@/lib/repo/types";
-import { store } from "@/lib/repo/in-memory";
+import { store } from "@/lib/repo";
+import { getSession } from "@/lib/server/session";
 
 export const metadata = { title: "Team" };
 
@@ -17,20 +18,17 @@ const ROLE_MATRIX: { cap: string; roles: Role[] }[] = [
   { cap: "Remove members", roles: ["owner"] },
 ];
 
-export default function TeamPage() {
-  const db = store.db;
-  const members = db.memberships.map((m) => ({
-    user: store.getUser(m.userId)!,
-    role: m.role,
-  }));
+export default async function TeamPage() {
+  const session = await getSession();
+  const members = store.getMembers();
 
   const stats: MemberStats[] = computeMemberStats(
-    db.users.map((u) => u.id),
+    store.getUsers().map((u) => u.id),
     store.getTasks(),
     store.getIssues(),
   );
 
-  const role = store.getRole(db.currentUserId);
+  const role = session.role;
   const overloaded = stats.filter((s) => s.overLimit).length;
 
   return (
@@ -49,7 +47,7 @@ export default function TeamPage() {
         members={members}
         stats={stats}
         role={role}
-        currentUserId={db.currentUserId}
+        currentUserId={session.userId}
       />
 
       <Panel>

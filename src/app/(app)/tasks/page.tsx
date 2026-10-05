@@ -2,8 +2,9 @@ import { Suspense } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TasksWorkspace } from "@/components/tasks/tasks-workspace";
-import type { Task, TaskStatus } from "@/lib/repo/types";
-import { store } from "@/lib/repo/in-memory";
+import type { TaskStatus } from "@/lib/repo/types";
+import { store } from "@/lib/repo";
+import { getSession } from "@/lib/server/session";
 
 export const metadata = { title: "Tasks" };
 
@@ -19,6 +20,7 @@ export default async function TasksPage({
   searchParams: Promise<Search>;
 }) {
   const sp = await searchParams;
+  const session = await getSession();
   const allTasks = store.getTasks();
 
   const q = pick(sp.q).toLowerCase();
@@ -49,12 +51,12 @@ export default async function TasksPage({
       />
       <Suspense fallback={<Skeleton className="h-96" />}>
         <TasksWorkspace
-          tasks={tasks as Task[]}
+          tasks={tasks}
           allTasks={allTasks}
           projects={store.getProjects()}
           users={store.getUsers()}
           issues={store.getIssues()}
-          role={store.getRole(store.db.currentUserId)}
+          role={session.role}
         />
       </Suspense>
     </div>

@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { deleteTaskAction, saveTask } from "@/lib/actions";
 import { PRIORITY_LABEL, STATUS_LABEL } from "@/lib/metrics";
 import type { Issue, Project, Task, User } from "@/lib/repo/types";
-import { formatShortDate, isOverdue, relativeTime } from "@/lib/utils";import { Avatar } from "@/components/ui/avatar";
+import { formatShortDate, isOverdue, relativeTime, toDateOnly } from "@/lib/utils";
+import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, Textarea } from "@/components/ui/input";
@@ -15,7 +16,7 @@ import { toast } from "@/components/ui/toaster";
 const DUE_OPTIONS = [3, 7, 14, 30].map((days) => {
   const d = new Date();
   d.setDate(d.getDate() + days);
-  return { value: d.toISOString().slice(0, 10), label: `In ${days} days` };
+  return { value: toDateOnly(d), label: `In ${days} days` };
 });
 
 export function TaskDrawer({

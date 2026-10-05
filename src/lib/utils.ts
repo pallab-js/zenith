@@ -22,20 +22,55 @@ export function initials(name: string): string {
     .join("");
 }
 
-export function formatShortDate(iso?: string | null): string {
-  if (!iso) return "—";
+/* ── Date handling ──────────────────────────────────────────────
+   <input type="date"> yields "YYYY-MM-DD", which `new Date()` parses as
+   *UTC* midnight — i.e. the previous calendar day in any UTC-negative
+   timezone. Comparing that against local midnight marked tasks due today
+   as overdue all day and shifted `formatShortDate` back one day. Every
+   date comparison in the app goes through these helpers instead.
+   ─────────────────────────────────────────────────────────────── */
+
+const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/** Parse an ISO timestamp or a `YYYY-MM-DD` date-only string.
+ *  Date-only strings resolve to *local* midnight (same calendar day for
+ *  everyone); full timestamps keep their exact instant. */
+export function toDate(iso?: string | null): Date | null {
+  if (!iso) return null;
+  const m = DATE_ONLY.exec(iso);
+  if (m) {
+    const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return Number.isNaN(d.getTime()) ? null : d;
 }
 
+/** Local midnight of the current day — the boundary "overdue" uses. */
+export function startOfToday(): Date {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/** `YYYY-MM-DD` for a date, in *local* time (safe to feed an `<input type=date>`). */
+export function toDateOnly(d: Date = new Date()): string {
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+/** True when the due date is strictly before today (status is the caller's job). */
 export function isOverdue(iso?: string | null): boolean {
-  if (!iso) return false;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return d < today;
+  const d = toDate(iso);
+  if (!d) return false;
+  return d < startOfToday();
+}
+
+export function formatShortDate(iso?: string | null): string {
+  const d = toDate(iso);
+  if (!d) return "—";
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 export function relativeTime(iso: string): string {
