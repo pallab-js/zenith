@@ -25,6 +25,9 @@
   /* Derived text opacities on dark surfaces */
   --color-ink-70: color-mix(in srgb, var(--color-ink) 70%, transparent);
   --color-ink-55: color-mix(in srgb, var(--color-ink) 55%, transparent);
+  /* 50% clears WCAG AA (≈5.3:1 on canvas); ink-40 is ~3.7:1 and is now
+     reserved for borders, dividers and decorative marks. */
+  --color-ink-50: color-mix(in srgb, var(--color-ink) 50%, transparent);
   --color-ink-40: color-mix(in srgb, var(--color-ink) 40%, transparent);
   --color-ink-12: color-mix(in srgb, var(--color-ink) 12%, transparent);
   --color-ink-06: color-mix(in srgb, var(--color-ink) 6%, transparent);
@@ -79,6 +82,20 @@
     opacity: 1;
     transform: none;
   }
+}
+
+/* ── Native <dialog> ──────────────────────────────────────── */
+
+/* UA gives dialog a white background and a hard border; reset both, then
+   restate our own tokens. `color-scheme` keeps form controls dark. */
+.zenith-dialog {
+  color-scheme: dark;
+  animation: var(--animate-fade-up);
+}
+
+.zenith-dialog::backdrop {
+  background: rgb(4 6 30 / 0.6);
+  backdrop-filter: blur(2px);
 }
 
 /* ── Base ─────────────────────────────────────────────────── */

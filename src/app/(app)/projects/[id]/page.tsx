@@ -171,7 +171,7 @@ function MiniStat({
 }) {
   return (
     <div className="rounded-lg border border-ink-06 bg-surface p-5">
-      <p className="font-head text-[11px] font-bold uppercase tracking-[0.12em] text-ink-40">
+      <p className="font-head text-[11px] font-bold uppercase tracking-[0.12em] text-ink-50">
         {label}
       </p>
       <p
@@ -182,7 +182,7 @@ function MiniStat({
       >
         {value}
       </p>
-      {sub ? <p className="mt-1.5 text-xs text-ink-40">{sub}</p> : null}
+      {sub ? <p className="mt-1.5 text-xs text-ink-50">{sub}</p> : null}
       {children}
     </div>
   );

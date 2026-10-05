@@ -298,7 +298,7 @@ export function IssueDrawer({
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-1.5 text-ink-40 transition hover:bg-ink-06 hover:text-ink"
+            className="rounded-full p-1.5 text-ink-50 transition hover:bg-ink-06 hover:text-ink"
             aria-label="Close"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden>
@@ -322,7 +322,7 @@ export function IssueDrawer({
               {issue.description}
             </p>
           ) : (
-            <p className="mt-3 flex items-center gap-2 text-[13px] text-ink-40">
+            <p className="mt-3 flex items-center gap-2 text-[13px] text-ink-50">
               <CircleDot className="h-4 w-4" aria-hidden />
               No description provided.
             </p>
@@ -335,14 +335,14 @@ export function IssueDrawer({
               <MetaRow label="Resolved" value={relativeTime(issue.resolvedAt)} />
             ) : null}
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-ink-40">Reporter</dt>
+              <dt className="text-ink-50">Reporter</dt>
               <dd className="flex items-center gap-2">
                 <Avatar user={reporter} size="xs" />
                 {reporter?.name}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-ink-40">Assignee</dt>
+              <dt className="text-ink-50">Assignee</dt>
               <dd className="flex items-center gap-2">
                 <Avatar user={assignee} size="xs" />
                 {assignee?.name ?? "Unassigned"}
@@ -352,7 +352,7 @@ export function IssueDrawer({
 
           {canEdit ? (
             <div className="mt-5">
-              <p className="mb-2 font-head text-[12px] font-bold uppercase tracking-[0.08em] text-ink-40">
+              <p className="mb-2 font-head text-[12px] font-bold uppercase tracking-[0.08em] text-ink-50">
                 Resolution
               </p>
               <div className="flex flex-wrap gap-2">
@@ -385,12 +385,12 @@ export function IssueDrawer({
           ) : null}
 
           <div className="mt-6">
-            <p className="mb-2 flex items-center gap-2 font-head text-[12px] font-bold uppercase tracking-[0.08em] text-ink-40">
+            <p className="mb-2 flex items-center gap-2 font-head text-[12px] font-bold uppercase tracking-[0.08em] text-ink-50">
               <Link2 className="h-3.5 w-3.5" aria-hidden />
               Linked tasks · {linkedIds.length}
             </p>
             {projectTasks.length === 0 ? (
-              <p className="text-[13px] text-ink-40">
+              <p className="text-[13px] text-ink-50">
                 This project has no tasks to link.
               </p>
             ) : (
@@ -414,10 +414,10 @@ export function IssueDrawer({
                         {on ? (
                           <Unlink className="h-3.5 w-3.5 shrink-0 text-primary" />
                         ) : (
-                          <Link2 className="h-3.5 w-3.5 shrink-0 text-ink-40" />
+                          <Link2 className="h-3.5 w-3.5 shrink-0 text-ink-50" />
                         )}
                         <span className="min-w-0 flex-1 truncate">{t.title}</span>
-                        <span className="shrink-0 text-[11px] text-ink-40">
+                        <span className="shrink-0 text-[11px] text-ink-50">
                           {TASK_STATUS_LABEL[t.status]}
                         </span>
                       </button>
@@ -444,7 +444,7 @@ export function IssueDrawer({
 function MetaRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <dt className="text-ink-40">{label}</dt>
+      <dt className="text-ink-50">{label}</dt>
       <dd className="text-right text-ink-70">{value}</dd>
     </div>
   );

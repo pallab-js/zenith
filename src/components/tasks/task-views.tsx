@@ -78,7 +78,7 @@ export function TaskFilters({
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[200px] flex-1">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-40"
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-50"
             aria-hidden
           />
           <Input
@@ -107,7 +107,7 @@ export function TaskFilters({
           />
         </Button>
 
-        <span className="ml-auto text-xs text-ink-40 tabular-nums">
+        <span className="ml-auto text-xs text-ink-50 tabular-nums">
           {count} of {total} shown
         </span>
       </div>
@@ -388,7 +388,7 @@ export function TaskList({
                       ? "text-magenta"
                       : t.priority === "high"
                         ? "text-primary"
-                        : "text-ink-40",
+                        : "text-ink-50",
                   )}
                 >
                   {PRIORITY_LABEL[t.priority]}
@@ -401,13 +401,13 @@ export function TaskList({
                     <span className="text-xs">{assignee.name}</span>
                   </span>
                 ) : (
-                  <span className="text-xs text-ink-40">Unassigned</span>
+                  <span className="text-xs text-ink-50">Unassigned</span>
                 )}
               </TD>
               <TD
                 className={cn(
                   "text-right text-xs tabular-nums whitespace-nowrap",
-                  late ? "font-bold text-magenta" : "text-ink-40",
+                  late ? "font-bold text-magenta" : "text-ink-50",
                 )}
               >
                 {formatShortDate(t.dueDate)}

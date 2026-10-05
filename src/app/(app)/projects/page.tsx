@@ -78,13 +78,13 @@ export default async function ProjectsPage() {
                         <h2 className="font-head text-[16px] font-bold leading-tight transition group-hover:text-link">
                           {p.name}
                         </h2>
-                        <p className="text-xs text-ink-40">
+                        <p className="text-xs text-ink-50">
                           {PROJECT_STATUS_LABEL[p.status]}
                         </p>
                       </div>
                     </div>
                     <ArrowUpRight
-                      className="h-4 w-4 shrink-0 text-ink-40 transition group-hover:text-link"
+                      className="h-4 w-4 shrink-0 text-ink-50 transition group-hover:text-link"
                       aria-hidden
                     />
                   </div>
@@ -93,13 +93,13 @@ export default async function ProjectsPage() {
                     {p.description || "No description yet."}
                   </p>
 
-                  <div className="mt-5 flex items-center justify-between text-xs text-ink-40">
+                  <div className="mt-5 flex items-center justify-between text-xs text-ink-50">
                     <span>
                       {s.done}/{s.total} tasks
                     </span>
                     <span
                       className={
-                        s.health === "at_risk" ? "text-magenta" : "text-ink-40"
+                        s.health === "at_risk" ? "text-magenta" : "text-ink-50"
                       }
                     >
                       {s.openIssues} open issue{s.openIssues === 1 ? "" : "s"}
@@ -130,7 +130,7 @@ export default async function ProjectsPage() {
                     </div>
                     <span
                       className={`inline-flex items-center gap-1.5 text-xs ${
-                        late ? "text-magenta" : "text-ink-40"
+                        late ? "text-magenta" : "text-ink-50"
                       }`}
                     >
                       <CalendarDays className="h-3.5 w-3.5" aria-hidden />

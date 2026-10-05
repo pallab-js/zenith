@@ -152,7 +152,7 @@ export function IssuesWorkspace({
           </Select>
         </label>
 
-        <span className="ml-auto text-xs text-ink-40 tabular-nums">
+        <span className="ml-auto text-xs text-ink-50 tabular-nums">
           {visible.length} of {issues.length}
         </span>
 
@@ -189,14 +189,14 @@ export function IssuesWorkspace({
                 />
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-2">
-                    <span className="font-head text-[13px] font-bold text-ink-40">
+                    <span className="font-head text-[13px] font-bold text-ink-50">
                       {i.key}
                     </span>
                     <span className="font-head text-[15px] font-bold text-ink">
                       {i.title}
                     </span>
                   </span>
-                  <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-40">
+                  <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-50">
                     <span>{project?.name ?? "—"}</span>
                     <span>· {relativeTime(i.createdAt)}</span>
                     {i.linkedTaskIds.length > 0 ? (

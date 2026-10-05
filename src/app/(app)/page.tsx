@@ -183,7 +183,7 @@ export default async function DashboardPage() {
                             <span className="block font-head font-bold text-ink transition group-hover:text-link">
                               {p.name}
                             </span>
-                            <span className="block text-xs text-ink-40">
+                            <span className="block text-xs text-ink-50">
                               {p.key} · {PROJECT_STATUS_LABEL[p.status]}
                             </span>
                           </span>
@@ -207,7 +207,7 @@ export default async function DashboardPage() {
                           className={
                             s.openIssues > 0
                               ? "tabular-nums text-magenta"
-                              : "tabular-nums text-ink-40"
+                              : "tabular-nums text-ink-50"
                           }
                         >
                           {s.openIssues}
@@ -259,12 +259,12 @@ export default async function DashboardPage() {
                         {VERB_COPY[a.verb] ?? a.verb}{" "}
                         <span className="text-ink">{a.entityLabel}</span>
                       </p>
-                      <p className="mt-0.5 flex items-center gap-2 text-xs text-ink-40">
+                      <p className="mt-0.5 flex items-center gap-2 text-xs text-ink-50">
                         <span>{relativeTime(a.at)}</span>
                         {a.meta ? <span>· {a.meta}</span> : null}
                       </p>
                     </div>
-                    <span className="mt-1 shrink-0 text-ink-40">
+                    <span className="mt-1 shrink-0 text-ink-50">
                       {a.entityType === "issue" ? (
                         <CircleDot className="h-3.5 w-3.5" />
                       ) : a.verb === "resolved" ? (
@@ -316,7 +316,7 @@ export default async function DashboardPage() {
             data={data.workload}
             ariaLabel="Team workload bar chart"
           />
-          <p className="mt-3 flex items-center gap-2 text-xs text-ink-40">
+          <p className="mt-3 flex items-center gap-2 text-xs text-ink-50">
             <span
               className="h-2.5 w-2.5 rounded-pill bg-primary"
               aria-hidden

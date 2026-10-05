@@ -191,7 +191,7 @@ export function ProjectTabs({
                 hint={`${crew.length} ${crew.length === 1 ? "person" : "people"} with assigned work`}
               />
               {crew.length === 0 ? (
-                <p className="text-sm text-ink-40">No tasks assigned yet.</p>
+                <p className="text-sm text-ink-50">No tasks assigned yet.</p>
               ) : (
                 <ul className="space-y-2.5">
                   {crew.map((m) => {
@@ -283,7 +283,7 @@ function Fact({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-3 text-sm">
-      <span className="text-ink-40">{label}</span>
+      <span className="text-ink-50">{label}</span>
       <span
         className={cn(
           "font-head font-medium",
@@ -363,14 +363,14 @@ function ProjectIssues({
                 >
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-center gap-2">
-                      <span className="font-head text-[13px] font-bold text-ink-40">
+                      <span className="font-head text-[13px] font-bold text-ink-50">
                         {i.key}
                       </span>
                       <span className="font-head text-[15px] font-bold">
                         {i.title}
                       </span>
                     </span>
-                    <span className="mt-1.5 block text-xs text-ink-40">
+                    <span className="mt-1.5 block text-xs text-ink-50">
                       {linked.length > 0
                         ? linked.map((t) => t.title).join(" · ")
                         : `Filed ${relativeTime(i.createdAt)}`}
@@ -457,7 +457,7 @@ function IssueQuickView({
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-1 text-ink-40 hover:bg-ink-06 hover:text-ink"
+            className="rounded-full p-1 text-ink-50 hover:bg-ink-06 hover:text-ink"
             aria-label="Close"
           >
             ✕
@@ -475,23 +475,23 @@ function IssueQuickView({
 
         <dl className="mt-4 space-y-2 rounded-lg bg-surface/60 p-3.5 text-[13px]">
           <div className="flex justify-between gap-3">
-            <dt className="text-ink-40">Assignee</dt>
+            <dt className="text-ink-50">Assignee</dt>
             <dd className="flex items-center gap-2">
               <Avatar user={assignee} size="xs" />
               {assignee?.name ?? "Unassigned"}
             </dd>
           </div>
           <div className="flex justify-between gap-3">
-            <dt className="text-ink-40">Filed</dt>
+            <dt className="text-ink-50">Filed</dt>
             <dd>{relativeTime(issue.createdAt)}</dd>
           </div>
         </dl>
 
-        <p className="mt-4 font-head text-[12px] font-bold uppercase tracking-[0.08em] text-ink-40">
+        <p className="mt-4 font-head text-[12px] font-bold uppercase tracking-[0.08em] text-ink-50">
           Linked tasks
         </p>
         {linked.length === 0 ? (
-          <p className="mt-1.5 text-sm text-ink-40">
+          <p className="mt-1.5 text-sm text-ink-50">
             None — link tasks from the Issues page.
           </p>
         ) : (
@@ -502,7 +502,7 @@ function IssueQuickView({
                 className="flex items-center justify-between gap-3 rounded-sm bg-surface/60 px-3 py-2 text-[13px]"
               >
                 <span className="truncate">{t.title}</span>
-                <span className="shrink-0 text-xs text-ink-40">
+                <span className="shrink-0 text-xs text-ink-50">
                   {STATUS_LABEL[t.status]}
                 </span>
               </li>
@@ -541,7 +541,7 @@ function ProjectActivity({ events }: { events: ActivityFeedItem[] }) {
                 </span>{" "}
                 {e.verb} <span className="text-ink">{e.entityLabel}</span>
               </p>
-              <p className="mt-0.5 text-xs text-ink-40">
+              <p className="mt-0.5 text-xs text-ink-50">
                 {relativeTime(e.at)}
                 {e.meta ? ` · ${e.meta}` : ""}
               </p>

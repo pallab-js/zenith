@@ -117,7 +117,7 @@ export function Sidebar({
 
 function PaletteHint() {
   return (
-    <p className="hidden items-center gap-2 rounded-sm bg-surface px-3 py-2 text-xs text-ink-40 lg:flex">
+    <p className="hidden items-center gap-2 rounded-sm bg-surface px-3 py-2 text-xs text-ink-50 lg:flex">
       <Command className="h-3.5 w-3.5" aria-hidden />
       <span>
         <kbd className="font-head">⌘K</kbd> to jump anywhere
@@ -174,11 +174,11 @@ function UserSwitcher({
           <span className="block truncate font-head text-sm font-bold">
             {currentUser.name}
           </span>
-          <span className="block truncate text-xs text-ink-40">
+          <span className="block truncate text-xs text-ink-50">
             {ROLE_LABEL[role]} · {currentUser.title}
           </span>
         </span>
-        <Menu className="h-4 w-4 shrink-0 text-ink-40" aria-hidden />
+        <Menu className="h-4 w-4 shrink-0 text-ink-50" aria-hidden />
       </button>
 
       {open && (
@@ -186,7 +186,7 @@ function UserSwitcher({
           role="menu"
           className="absolute bottom-[calc(100%+8px)] left-0 right-0 z-50 overflow-hidden rounded-lg border border-ink-12 bg-canvas p-1.5 shadow-modal animate-fade-up"
         >
-          <p className="px-2 pb-1.5 pt-1 text-[11px] font-bold uppercase tracking-[0.1em] text-ink-40">
+          <p className="px-2 pb-1.5 pt-1 text-[11px] font-bold uppercase tracking-[0.1em] text-ink-50">
             View as member
           </p>
           {members.map(({ user: u, role: r }) => (
@@ -204,7 +204,7 @@ function UserSwitcher({
                 <span className="block truncate text-sm font-medium">
                   {u.name}
                 </span>
-                <span className="block truncate text-xs text-ink-40">
+                <span className="block truncate text-xs text-ink-50">
                   {ROLE_LABEL[r]}
                 </span>
               </span>

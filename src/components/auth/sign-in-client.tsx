@@ -89,7 +89,7 @@ export default function SignInClient({
                       "flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 font-head text-[12px] font-bold",
                       isActive
                         ? "border-primary/40 bg-primary/20 text-ink"
-                        : "border-ink-12 bg-canvas text-ink-40",
+                        : "border-ink-12 bg-canvas text-ink-50",
                     )}
                   >
                     {ROLE_ICON[role]}

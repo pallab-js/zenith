@@ -11,7 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { can } from "@/lib/permissions";
 import type { Issue, Project, Role, Task } from "@/lib/repo/types";
 import { cn } from "@/lib/utils";
@@ -42,6 +42,9 @@ export function CommandPalette({
   const [cursor, setCursor] = useState(0);
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const uid = useId();
+  const listId = `${uid}-list`;
 
   useEffect(() => {
     const onEvent = () => {
@@ -63,8 +66,25 @@ export function CommandPalette({
     };
   }, []);
 
+  // Native <dialog> gives us focus containment, Escape and background
+  // inertness — the same reason src/components/ui/modal.tsx uses one.
   useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 30);
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open && !dialog.open) {
+      dialog.showModal();
+      inputRef.current?.focus();
+    } else if (!open && dialog.open) {
+      dialog.close();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [open]);
 
   const items = useMemo<Item[]>(() => {
@@ -144,70 +164,95 @@ export function CommandPalette({
       .slice(0, 12);
   }, [items, query]);
 
-  if (!open) return null;
-
   const groups = filtered.reduce<Record<string, Item[]>>((acc, item) => {
     (acc[item.group] ??= []).push(item);
     return acc;
   }, {});
 
+  // Cursor can lag a shrinking result set for one render — clamp it so
+  // aria-activedescendant never points at a removed option.
+  const active = filtered.length ? Math.min(cursor, filtered.length - 1) : 0;
+
   let index = -1;
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-start justify-center px-4 pt-[12vh]">
-      <button
-        className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
-        onClick={() => setOpen(false)}
-        aria-label="Close command palette"
-        tabIndex={-1}
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Command palette"
-        className="relative z-10 w-full max-w-xl overflow-hidden rounded-lg border border-ink-12 bg-canvas shadow-modal animate-fade-up"
-      >
-        <div className="flex items-center gap-3 border-b border-ink-06 px-4">
-          <Search className="h-4 w-4 shrink-0 text-ink-40" aria-hidden />
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setCursor(0);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowDown") {
-                e.preventDefault();
-                setCursor((c) => Math.min(c + 1, filtered.length - 1));
-              } else if (e.key === "ArrowUp") {
-                e.preventDefault();
-                setCursor((c) => Math.max(c - 1, 0));
-              } else if (e.key === "Enter") {
-                e.preventDefault();
-                filtered[cursor]?.run?.();
-              } else if (e.key === "Escape") {
-                setOpen(false);
-              }
-            }}
-            placeholder="Jump to a project, task or issue…"
-            className="h-14 w-full bg-transparent text-[15px] text-ink placeholder:text-ink-40 focus:outline-none"
-            aria-label="Search commands"
-          />
-          <kbd className="hidden shrink-0 rounded-xs border border-ink-12 px-1.5 py-0.5 text-[11px] text-ink-40 sm:block">
-            ESC
-          </kbd>
-        </div>
+    <dialog
+      ref={dialogRef}
+      aria-label="Command palette"
+      onCancel={(e) => {
+        e.preventDefault();
+        if (open) setOpen(false);
+      }}
+      onClick={(e) => {
+        // Clicks on the ::backdrop arrive on the dialog itself, outside its box.
+        if (e.target !== e.currentTarget) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        const inBox =
+          e.clientX >= r.left &&
+          e.clientX <= r.right &&
+          e.clientY >= r.top &&
+          e.clientY <= r.bottom;
+        if (!inBox) setOpen(false);
+      }}
+      className="zenith-dialog fixed inset-0 mx-auto mt-[12vh] w-[calc(100%-2rem)] max-w-xl overflow-hidden border border-ink-12 bg-canvas p-0 text-ink shadow-modal"
+    >
+      <div className="flex items-center gap-3 border-b border-ink-06 px-4">
+        <Search className="h-4 w-4 shrink-0 text-ink-50" aria-hidden />
+        <input
+          ref={inputRef}
+          role="combobox"
+          aria-expanded={open}
+          aria-controls={listId}
+          aria-activedescendant={
+            filtered.length ? `${listId}-o${active}` : undefined
+          }
+          aria-autocomplete="list"
+          aria-label="Search commands"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setCursor(0);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              setCursor((c) => Math.min(c + 1, filtered.length - 1));
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              setCursor((c) => Math.max(c - 1, 0));
+            } else if (e.key === "Enter") {
+              e.preventDefault();
+              filtered[active]?.run?.();
+            }
+            // Escape is handled by the dialog's `cancel` event above.
+          }}
+          placeholder="Jump to a project, task or issue…"
+          className="h-14 w-full bg-transparent text-[15px] text-ink placeholder:text-ink-50 focus:outline-none"
+        />
+        <kbd className="hidden shrink-0 rounded-xs border border-ink-12 px-1.5 py-0.5 text-[11px] text-ink-50 sm:block">
+          ESC
+        </kbd>
+      </div>
 
-        <div className="max-h-[52vh] overflow-y-auto p-2">
-          {filtered.length === 0 ? (
-            <p className="px-3 py-8 text-center text-sm text-ink-40">
-              Nothing matches “{query}”
-            </p>
-          ) : (
-            Object.entries(groups).map(([group, groupItems]) => (
-              <div key={group} className="mb-1.5">
-                <p className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-ink-40">
+      <div
+        id={listId}
+        role="listbox"
+        aria-label="Results"
+        className="max-h-[52vh] overflow-y-auto p-2"
+      >
+        {filtered.length === 0 ? (
+          <p role="status" className="px-3 py-8 text-center text-sm text-ink-50">
+            Nothing matches “{query}”
+          </p>
+        ) : (
+          Object.entries(groups).map(([group, groupItems], gi) => {
+            const groupId = `${uid}-grp${gi}`;
+            return (
+              <div key={group} role="group" aria-labelledby={groupId} className="mb-1.5">
+                <p
+                  id={groupId}
+                  className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-ink-50"
+                >
                   {group}
                 </p>
                 {groupItems.map((item) => {
@@ -216,12 +261,19 @@ export function CommandPalette({
                   return (
                     <button
                       key={item.id}
+                      id={`${listId}-o${i}`}
+                      role="option"
+                      aria-selected={active === i}
+                      tabIndex={-1}
+                      // Keep focus (and the combobox) on the input until the
+                      // click lands; the popup closes immediately after.
+                      onMouseDown={(e) => e.preventDefault()}
                       onMouseEnter={() => setCursor(i)}
                       onClick={() => item.run?.()}
                       className={cn(
                         "flex w-full items-center gap-3 rounded-sm px-3 py-2.5 text-left",
                         "transition-colors",
-                        cursor === i ? "bg-primary/20" : "hover:bg-ink-06",
+                        active === i ? "bg-primary/20" : "hover:bg-ink-06",
                       )}
                     >
                       <span className="text-ink-55">{item.icon}</span>
@@ -229,13 +281,13 @@ export function CommandPalette({
                         {item.label}
                       </span>
                       {item.meta ? (
-                        <span className="shrink-0 text-xs text-ink-40">
+                        <span className="shrink-0 text-xs text-ink-50">
                           {item.meta}
                         </span>
                       ) : null}
-                      {cursor === i ? (
+                      {active === i ? (
                         <CornerDownLeft
-                          className="h-3.5 w-3.5 shrink-0 text-ink-40"
+                          className="h-3.5 w-3.5 shrink-0 text-ink-50"
                           aria-hidden
                         />
                       ) : null}
@@ -243,10 +295,10 @@ export function CommandPalette({
                   );
                 })}
               </div>
-            ))
-          )}
-        </div>
+            );
+          })
+        )}
       </div>
-    </div>
+    </dialog>
   );
 }

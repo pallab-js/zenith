@@ -72,7 +72,7 @@ export function Toaster() {
               toasts = toasts.filter((x) => x.id !== t.id);
               emit();
             }}
-            className="rounded-full p-1 text-ink-40 transition hover:bg-ink-06 hover:text-ink"
+            className="rounded-full p-1 text-ink-50 transition hover:bg-ink-06 hover:text-ink"
             aria-label="Dismiss notification"
           >
             <X className="h-4 w-4" />

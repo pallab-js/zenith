@@ -185,7 +185,7 @@ function BoardColumn({
           />
         ))}
         {tasks.length === 0 ? (
-          <p className="rounded-sm border border-dashed border-ink-06 px-3 py-6 text-center text-xs text-ink-40">
+          <p className="rounded-sm border border-dashed border-ink-06 px-3 py-6 text-center text-xs text-ink-50">
             Drop here
           </p>
         ) : null}
@@ -239,7 +239,7 @@ function TaskCard({
           <button
             {...attributes}
             {...listeners}
-            className="cursor-grab touch-none rounded-xs p-0.5 text-ink-40 opacity-0 transition hover:text-ink focus-visible:opacity-100 group-hover:opacity-100 active:cursor-grabbing"
+            className="cursor-grab touch-none rounded-xs p-0.5 text-ink-50 opacity-0 transition hover:text-ink focus-visible:opacity-100 group-hover:opacity-100 active:cursor-grabbing"
             aria-label={`Drag ${task.title}`}
           >
             <GripVertical className="h-4 w-4" />
@@ -268,7 +268,7 @@ function TaskCard({
               {PRIORITY_LABEL[task.priority]}
             </Badge>
           ) : task.priority !== "medium" ? (
-            <span className="text-[10px] font-bold uppercase tracking-wide text-ink-40">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-ink-50">
               {PRIORITY_LABEL[task.priority]}
             </span>
           ) : null}
@@ -278,7 +278,7 @@ function TaskCard({
             <span
               className={cn(
                 "text-[11px] tabular-nums",
-                late ? "font-bold text-magenta" : "text-ink-40",
+                late ? "font-bold text-magenta" : "text-ink-50",
               )}
             >
               {formatShortDate(task.dueDate)}

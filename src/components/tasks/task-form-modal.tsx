@@ -213,7 +213,7 @@ export function TaskFormModal({
                 }
               }}
               placeholder={form.labels.length ? "Add another…" : "e.g. frontend"}
-              className="h-8 w-36 rounded-lg border border-dashed border-ink-12 bg-transparent px-2.5 text-xs text-ink placeholder:text-ink-40 focus:border-primary focus:outline-none"
+              className="h-8 w-36 rounded-lg border border-dashed border-ink-12 bg-transparent px-2.5 text-xs text-ink placeholder:text-ink-50 focus:border-primary focus:outline-none"
             />
           </div>
         </Field>

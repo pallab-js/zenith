@@ -15,7 +15,8 @@ import {
   YAxis,
 } from "recharts";
 
-const AXIS = { fontSize: 11, fill: "var(--color-ink-40)" };
+// Axis labels are text — use the AA-safe token (ink-40 is ~3.7:1).
+const AXIS = { fontSize: 11, fill: "var(--color-ink-50)" };
 
 const tooltipStyle = {
   background: "var(--color-canvas)",
@@ -74,7 +75,7 @@ export function DonutChart({
           <span className="font-display text-2xl font-bold leading-none">
             {centerValue}
           </span>
-          <span className="mt-1 text-[11px] uppercase tracking-wider text-ink-40">
+          <span className="mt-1 text-[11px] uppercase tracking-wider text-ink-50">
             {centerLabel}
           </span>
         </span>

@@ -111,7 +111,7 @@ export function TaskDrawer({
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-1.5 text-ink-40 transition hover:bg-ink-06 hover:text-ink"
+            className="rounded-full p-1.5 text-ink-50 transition hover:bg-ink-06 hover:text-ink"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -236,7 +236,7 @@ export function TaskDrawer({
                 />
                 {assignee ? (
                   <div className="flex items-center justify-between gap-3 pt-1">
-                    <dt className="text-ink-40">Assignee</dt>
+                    <dt className="text-ink-50">Assignee</dt>
                     <dd className="flex items-center gap-2">
                       <Avatar user={assignee} size="xs" />
                       {assignee.name}
@@ -248,7 +248,7 @@ export function TaskDrawer({
 
             <DrawerField label="Linked issues">
               {linked.length === 0 ? (
-                <p className="flex items-center gap-2 rounded-lg border border-dashed border-ink-12 px-3.5 py-3 text-[13px] text-ink-40">
+                <p className="flex items-center gap-2 rounded-lg border border-dashed border-ink-12 px-3.5 py-3 text-[13px] text-ink-50">
                   <Link2 className="h-4 w-4" aria-hidden />
                   No issues linked to this task.
                 </p>
@@ -282,7 +282,7 @@ export function TaskDrawer({
         </div>
 
         <footer className="flex items-center justify-between gap-3 border-t border-ink-06 px-5 py-4">
-          <span className="text-xs text-ink-40">
+          <span className="text-xs text-ink-50">
             {canEdit ? "Autosaves on blur" : "Read-only role"}
           </span>
           {canEdit ? (
@@ -311,7 +311,7 @@ function DrawerField({
 }) {
   return (
     <div>
-      <p className="mb-1.5 font-head text-[12px] font-bold uppercase tracking-[0.08em] text-ink-40">
+      <p className="mb-1.5 font-head text-[12px] font-bold uppercase tracking-[0.08em] text-ink-50">
         {label}
       </p>
       {children}
@@ -322,7 +322,7 @@ function DrawerField({
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <dt className="text-ink-40">{label}</dt>
+      <dt className="text-ink-50">{label}</dt>
       <dd className="text-right text-ink-70">{value}</dd>
     </div>
   );

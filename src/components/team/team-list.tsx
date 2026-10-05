@@ -68,13 +68,13 @@ export function TeamList({
                 <h2 className="truncate font-head text-[16px] font-bold leading-tight">
                   {user.name}
                   {isSelf ? (
-                    <span className="ml-1.5 text-xs font-medium text-ink-40">
+                    <span className="ml-1.5 text-xs font-medium text-ink-50">
                       (you)
                     </span>
                   ) : null}
                 </h2>
                 <p className="truncate text-[13px] text-ink-55">{user.title}</p>
-                <p className="truncate text-xs text-ink-40">{user.email}</p>
+                <p className="truncate text-xs text-ink-50">{user.email}</p>
               </div>
               <Badge
                 tone={
@@ -101,7 +101,7 @@ export function TeamList({
 
             <div className="mt-4">
               <div className="mb-1.5 flex items-baseline justify-between text-xs">
-                <span className="text-ink-40">Workload vs limit ({WIP_LIMIT})</span>
+                <span className="text-ink-50">Workload vs limit ({WIP_LIMIT})</span>
                 <span
                   className={cn(
                     "font-head font-bold tabular-nums",
@@ -155,7 +155,7 @@ export function TeamList({
                 ) : null}
               </div>
             ) : (
-              <p className="mt-5 border-t border-ink-06 pt-4 text-xs text-ink-40">
+              <p className="mt-5 border-t border-ink-06 pt-4 text-xs text-ink-50">
                 {ROLE_DESCRIPTION[memberRole]}
               </p>
             )}
@@ -169,7 +169,7 @@ export function TeamList({
             <UserPlus className="h-5 w-5" aria-hidden />
           </span>
           <p className="font-head text-sm font-bold">Invite teammates</p>
-          <p className="mt-1 max-w-[220px] text-xs text-ink-40">
+          <p className="mt-1 max-w-[220px] text-xs text-ink-50">
             Invitations are out of scope for v1 — the workspace is seeded with
             the demo crew.
           </p>
@@ -201,7 +201,7 @@ function Metric({
       >
         {value}
       </dd>
-      <dt className="mt-1 text-[11px] uppercase tracking-wide text-ink-40">
+      <dt className="mt-1 text-[11px] uppercase tracking-wide text-ink-50">
         {label}
       </dt>
     </div>

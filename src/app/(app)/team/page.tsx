@@ -59,13 +59,13 @@ export default async function TeamPage() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr>
-                <th className="pb-3 font-head text-[12px] font-bold uppercase tracking-[0.08em] text-ink-40">
+                <th className="pb-3 font-head text-[12px] font-bold uppercase tracking-[0.08em] text-ink-50">
                   Capability
                 </th>
                 {(Object.keys(ROLE_LABEL) as Role[]).map((r) => (
                   <th
                     key={r}
-                    className="pb-3 text-center font-head text-[12px] font-bold uppercase tracking-[0.08em] text-ink-40"
+                    className="pb-3 text-center font-head text-[12px] font-bold uppercase tracking-[0.08em] text-ink-50"
                   >
                     {ROLE_LABEL[r]}
                   </th>
@@ -83,7 +83,7 @@ export default async function TeamPage() {
                           ✓
                         </span>
                       ) : (
-                        <span className="text-ink-40">—</span>
+                        <span className="text-ink-50">—</span>
                       )}
                     </td>
                   ))}
@@ -92,7 +92,7 @@ export default async function TeamPage() {
             </tbody>
           </table>
         </div>
-        <ul className="mt-4 grid gap-1.5 text-xs text-ink-40 sm:grid-cols-2">
+        <ul className="mt-4 grid gap-1.5 text-xs text-ink-50 sm:grid-cols-2">
           {(Object.keys(ROLE_LABEL) as Role[]).map((r) => (
             <li key={r}>
               <span className="font-head font-bold text-ink-70">
