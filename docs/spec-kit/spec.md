@@ -86,12 +86,14 @@ Members mutate tasks/issues they can access; admins+ manage projects and team.
   but cannot edit the session value itself.
 
 ### FR-6 Global
-- FR-6.1 App shell: indigo sidebar (Dashboard, Projects, Tasks, Issues, Team), collapses
-  to hamburger < 768px; top bar with search and ⌘K command palette.
+- FR-6.1 App shell: indigo sidebar (Dashboard, Projects, Tasks, Issues, Team), with the
+  search/⌘K entry point; below `lg` it collapses into a hamburger drawer behind a sticky
+  top bar that keeps the menu and palette buttons.
 - FR-6.2 Command palette: fuzzy jump to pages, projects, tasks, issues; create actions.
 - FR-6.3 Toasts on every mutation; empty states on every empty view.
 - FR-6.4 Every mutation writes an `ActivityEvent` and updates the dashboard feed.
-- FR-6.5 Persist to in-memory store (state resets on server restart — documented).
+- FR-6.5 Persist to SQLite (`./zenith.db`, better-sqlite3) behind the repo seam; the
+  in-memory adapter stays available for tests and is exercised by the same checks.
 
 ---
 
@@ -105,7 +107,7 @@ Members mutate tasks/issues they can access; admins+ manage projects and team.
 | NFR-4 | Performance: dashboard server-rendered; charts client-only; no layout shift |
 | NFR-5 | Design tokens only — zero hard-coded colours outside `globals.css` |
 | NFR-6 | `lint`, `typecheck`, `build` all green at every phase gate |
-| NFR-7 | Repo seam documented so Postgres/Drizzle replaces in-memory in one file |
+| NFR-7 | Repo seam documented so Postgres/Drizzle replaces the SQLite adapter in one file |
 
 ---
 

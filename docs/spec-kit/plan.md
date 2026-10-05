@@ -19,8 +19,9 @@ without user approval.
 ├─────────────────────────────────────────────────────────────┤
 │ Repository seam  ·  `lib/repo/types.ts` (interfaces)        │
 ├──────────────────────────┬──────────────────────────────────┤
-│ InMemoryRepo (v1)        │  PostgresRepo (future, one file) │
-│ globalThis-cached store  │                                  │
+│ SQLiteRepo (default)     │  PostgresRepo (future, one file) │
+│ ./zenith.db, WAL         │                                  │
+│ InMemoryRepo (tests)     │                                  │
 ├──────────────────────────┴──────────────────────────────────┤
 │ Seed data (`lib/seed`) — 6 members, 3 projects, 40 tasks,   │
 │ 18 issues, 60 activity events                               │
@@ -46,7 +47,7 @@ emits an `ActivityEvent`.
 
 No ORM, no auth library, no CSS-in-JS in v1.
 
-## 3. Data model (in-memory)
+## 3. Data model (SQLite, same shape in memory)
 
 ```ts
 ID = string (nanoid-style: `${prefix}_${random}`)
@@ -68,7 +69,7 @@ Comment   { id, taskId|issueId, authorId, body, createdAt }        // drawer onl
 Activity  { id, actorId, verb: 'created'|'updated'|'moved'|'assigned'|'resolved'|...,
             entityType: 'task'|'issue'|'project'|'member', entityId, entityLabel,
             meta?, at }
-Session   { userId }                        // mock; switchable from top bar
+Session   { userId }                        // mock; switchable from the sidebar
 ```
 
 **Derived metrics** (computed, never stored): on-track % = projects not overdue with
@@ -129,7 +130,7 @@ zenith/
 
 | Risk | Mitigation |
 |---|---|
-| In-memory state resets on restart | Documented in README; repo seam makes DB swap one file |
+| SQLite write contention (better-sqlite3 is sync) | WAL mode, single-writer server actions; swap `ZENITH_REPO=memory` if a deploy ever needs to shed the file |
 | dnd-kit + RSC hydration | board is a client component; mutations via server actions |
 | Recharts bundle on dashboard | dynamic import, `ssr:false`, skeleton dims fixed |
 | Over-cluttered dashboard | constitution §II/§III reviewed at Phase 4 gate |

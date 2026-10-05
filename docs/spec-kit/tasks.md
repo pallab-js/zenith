@@ -104,4 +104,30 @@ Reference: `spec.md` FR-x / `constitution.md` §x.
 4. Switch to Viewer → every mutation control disabled/hidden.
 5. ⌘K → type "auth" → lands on the project.
 6. Resize 375px → sidebar becomes drawer; all charts/tables usable.
-7. Restart dev server → store reseeds (documented behavior).
+7. Restart dev server → data persists in `./zenith.db` (delete it to see the seed
+   applied fresh).
+
+---
+
+## Phase 10 — Post-review remediation (critical review of v1)
+
+- [ ] 10.1 Git + CI: `git init`, baseline commit, `.github/workflows/ci.yml` running
+      `pnpm verify`; `.gitignore` covers `*.db*`
+- [ ] 10.2 Persistence: SQLite adapter (`repo/sqlite.ts`, better-sqlite3, WAL) picked by
+      `ZENITH_REPO`; seed applied on first run; data survives restart; in-memory adapter
+      kept for tests via `ZENITH_REPO=memory`
+- [ ] 10.3 Sealed repo seam: dropped the `db: DBShape` escape hatch, mutations take an
+      explicit `actorId`, added `getMembers()`/`getMemberships()`
+- [ ] 10.4 Session: identity moved to an httpOnly cookie set by a validated server action
+      (`lib/server/session.ts`); pure rules in `lib/service.ts` (Next-free, testable)
+- [ ] 10.5 Dates: `toDate`/`isOverdue`/`toDateOnly` helpers, every call site converted,
+      6 timezone regression checks added
+- [ ] 10.6 Spec drift: sortable list view (FR-3.2), label filter (FR-3.3), FR-5.4/FR-6.1/
+      FR-6.5 wording corrected
+- [ ] 10.7 Accessibility: native `<dialog>` for modal + command palette (focus trap,
+      Escape, inert background, focus restore), combobox/listbox ARIA on ⌘K, `aria-sort`
+      on list headers, AA-safe `ink-50` body text
+- [ ] 10.8 Docs: README (persistence, 100 checks, a11y), `plan.md`/`spec.md` corrected,
+      this phase recorded
+- [ ] 10.9 Re-run the manual QA script in a browser (no headless Chrome in this
+      environment) — items 1–7 above

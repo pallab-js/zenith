@@ -22,10 +22,12 @@ pnpm dev            # http://localhost:3000
 | `pnpm build` / `pnpm start` | Production build / serve |
 | `pnpm lint` | ESLint |
 | `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm test` | Data-layer smoke tests (`scripts/smoke.ts`, 29 checks) |
+| `pnpm test` | Smoke suite (`scripts/smoke.ts`) — 100 checks, run against **both** repo adapters |
 | `pnpm verify` | lint + typecheck + test + build — the phase gate |
 
-No environment variables, no database, no external services. Clone → run.
+No environment variables required: the SQLite file (`./zenith.db`) is created and
+seeded on first run. Optional knobs: `ZENITH_DB_PATH` (path or `:memory:`) and
+`ZENITH_REPO=sqlite|memory`. Clone → run.
 
 ---
 
@@ -38,8 +40,9 @@ No environment variables, no database, no external services. Clone → run.
 - **Projects (`/projects`, `/projects/[id]`)** — portfolio cards with progress rings;
   detail view with Overview · Board · Issues · Activity tabs, crew and lead.
 - **Tasks (`/tasks`)** — kanban across Backlog → To do → In progress → In review → Done
-  with drag-and-drop, plus a sortable list view. Collapsible filters (project, assignee,
-  priority, status, text search) live in the URL, so views are shareable.
+  with drag-and-drop, plus a sortable list view (click a column header to sort). Collapsible
+  filters (project, assignee, priority, status, label, text search) live in the URL, so
+  views are shareable.
 - **Issues (`/issues`)** — severity-ordered triage, severity chart, critical counter,
   task linking, resolve/reopen.
 - **Team (`/team`)** — members, roles, workload bars with a WIP limit of 7, and an
@@ -63,24 +66,28 @@ UI (RSC + client islands, Tailwind 4 design tokens)
       └─ Server actions (src/lib/actions.ts) — auth check → parse → mutate →
          emit ActivityEvent → revalidatePath
           └─ Repository seam (src/lib/repo/types.ts)   ← the only write path
-               └─ InMemoryRepo (src/lib/repo/in-memory.ts)
-                    └─ Seed (src/lib/seed.ts) — 6 people · 3 projects ·
-                       40 tasks · 18 issues · 60 activity events
+               ├─ SQLiteRepo (src/lib/repo/sqlite.ts)      ← default
+               │    └─ ./zenith.db (better-sqlite3, WAL)   ← persisted
+               └─ InMemoryRepo (src/lib/repo/in-memory.ts) ← tests (ZENITH_REPO=memory)
+                    └─ Seed (src/lib/seed.ts) — 7 people · 3 projects ·
+                       40 tasks · 18 issues · 59 activity events
 ```
 
-**Key rule:** nothing outside `src/lib/repo` imports the adapter. Replacing the
-in-memory store with Postgres/Drizzle is a one-file change — see
-`src/lib/repo/types.ts` for the contract and `Store` for the mutation surface.
+**Key rule:** nothing outside `src/lib/repo` imports the adapter — pages call the seam
+and never touch `db`. Both adapters implement the same `Repo` contract (see
+`src/lib/repo/types.ts`) and the smoke suite runs the *same* checks against each, so a
+Postgres/Drizzle port is one new file plus one `ZENITH_REPO` value.
 
 Derived metrics (`src/lib/metrics.ts`) are computed, never stored: on-track %,
 per-project health, workload, status/severity counts, the 30-day trend.
 
-### ⚠️ Persistence caveat
+### Persistence
 
-State lives in a `globalThis` singleton on the server. **It resets when the server
-process restarts** (and is per-instance in production). This is deliberate for v1 —
-the demo needs no infrastructure. All mutations flow through the repo seam, so the
-migration path to real persistence touches exactly one new file.
+State lives in a SQLite database (`./zenith.db`, WAL mode) opened lazily on first
+access — **it survives restarts**, and the seed data is written only when the file is
+new. `ZENITH_DB_PATH` picks another file (or `:memory:`); `ZENITH_REPO=memory` swaps in
+the seeded in-memory adapter for tests. Every mutation still flows through the repo
+seam, so the choice above never leaks past `src/lib/repo/index.ts`.
 
 ---
 
@@ -125,10 +132,16 @@ Requirements trace: every `FR-*` in `spec.md` has an implementation in `src/`, a
 
 - `pnpm lint` — 0 errors
 - `pnpm typecheck` — clean under `strict`
-- `pnpm test` — 29/29 checks (seed integrity, metrics, mutations, permissions)
-- `pnpm build` — all routes compile; app routes are `force-dynamic` (mutable server state)
+- `pnpm test` — 100/100 checks (seed integrity, metrics, mutations, permissions,
+  session), run against both the SQLite and in-memory adapters
+- `pnpm build` — all routes compile; app routes are `force-dynamic` (they read live
+  server state)
 - Routes smoke-tested at 200: `/`, `/projects`, `/projects/[id]`, `/tasks`, `/issues`,
-  `/team`, `/sign-in`, and 404 for unknown paths
+  `/team`, `/sign-in`, and 404 for unknown paths; filter URLs verified server-side
+  (`/tasks?label=mobile` → 5 of 40)
+- Accessibility: modals and the command palette are native `<dialog>` (focus trap,
+  Escape, background inert, focus restore), the palette is a real combobox/listbox,
+  sortable headers expose `aria-sort`, and body text uses the AA-safe `ink-50` token
 
 ---
 
