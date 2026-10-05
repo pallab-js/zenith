@@ -28,6 +28,7 @@ export default async function TasksPage({
   const assignee = pick(sp.assignee);
   const priority = pick(sp.priority);
   const status = pick(sp.status);
+  const label = pick(sp.label);
 
   const tasks = allTasks.filter((t) => {
     if (project && t.projectId !== project) return false;
@@ -35,6 +36,7 @@ export default async function TasksPage({
     if (assignee && assignee !== "none" && t.assigneeId !== assignee) return false;
     if (priority && t.priority !== priority) return false;
     if (status && t.status !== (status as TaskStatus)) return false;
+    if (label && !t.labels.includes(label)) return false;
     if (q) {
       const hay = `${t.title} ${t.description} ${t.labels.join(" ")}`.toLowerCase();
       if (!hay.includes(q)) return false;

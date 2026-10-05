@@ -87,7 +87,8 @@ export function TaskBoard({
     if (!(status in columns)) return;
     if (task.status === status) return;
 
-    // Optimistic move, then persist.
+    // Persist the move, then toast — `moveTaskAction` revalidates on success,
+    // so what renders after the await is the server's truth, not a guess.
     const res = await moveTaskAction(taskId, status, columns[status].length);
     if (res.ok) toast.success(`Moved to ${STATUS_LABEL[status]}`);
     else toast.error(res.error);

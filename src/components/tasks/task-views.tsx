@@ -1,27 +1,42 @@
 "use client";
 
-import { ChevronDown, ListFilter, Search, X } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronDown,
+  ListFilter,
+  Search,
+  X,
+} from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { PRIORITY_LABEL, STATUS_LABEL } from "@/lib/metrics";
+import { useEffect, useMemo, useState } from "react";
+import {
+  PRIORITY_LABEL,
+  PRIORITY_ORDER,
+  STATUS_LABEL,
+  STATUS_ORDER,
+} from "@/lib/metrics";
 import type { Project, Task, User } from "@/lib/repo/types";
-import { cn, formatShortDate, isOverdue } from "@/lib/utils";
+import { cn, formatShortDate, isOverdue, toDate } from "@/lib/utils";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
 import { Table, TD, TH, THead, TR } from "@/components/ui/table";
 
-const KEYS = ["project", "assignee", "priority", "status", "q"] as const;
+const KEYS = ["project", "assignee", "priority", "status", "label", "q"] as const;
 
 export function TaskFilters({
   projects,
   users,
+  labels,
   count,
   total,
 }: {
   projects: Project[];
   users: User[];
+  labels: string[];
   count: number;
   total: number;
 }) {
@@ -33,16 +48,18 @@ export function TaskFilters({
 
   const activeCount = KEYS.filter((k) => params.get(k)).length;
 
+  // Debounced text search. Reads the *live* URL at flush time so a keystroke
+  // racing a filter change can't clobber the other param.
   useEffect(() => {
     const t = setTimeout(() => {
-      const next = new URLSearchParams(params.toString());
+      const next = new URLSearchParams(window.location.search);
       if (q) next.set("q", q);
       else next.delete("q");
-      router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+      const qs = next.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     }, 250);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q]);
+  }, [q, pathname, router]);
 
   function setParam(key: string, value: string) {
     const next = new URLSearchParams(params.toString());
@@ -166,6 +183,25 @@ export function TaskFilters({
             </Select>
           </label>
 
+          {labels.length > 0 ? (
+            <label className="min-w-[140px] flex-1">
+              <span className="mb-1.5 block font-head text-[12px] font-medium text-ink-55">
+                Label
+              </span>
+              <Select
+                value={params.get("label") ?? ""}
+                onChange={(e) => setParam("label", e.target.value)}
+              >
+                <option value="">Any</option>
+                {labels.map((l) => (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                ))}
+              </Select>
+            </label>
+          ) : null}
+
           {activeCount > 0 ? (
             <Button variant="ghost" onClick={clearAll} icon={<X className="h-4 w-4" />}>
               Clear
@@ -174,6 +210,87 @@ export function TaskFilters({
         </div>
       ) : null}
     </div>
+  );
+}
+
+/* ── Sortable list view (spec FR-3.2) ─────────────────────── */
+
+type SortKey = "title" | "project" | "status" | "priority" | "assignee" | "due";
+type Sort = { key: SortKey; dir: "asc" | "desc" };
+
+const COLUMNS: { key: SortKey; label: string; className?: string }[] = [
+  { key: "title", label: "Task" },
+  { key: "project", label: "Project" },
+  { key: "status", label: "Status" },
+  { key: "priority", label: "Priority" },
+  { key: "assignee", label: "Assignee" },
+  { key: "due", label: "Due", className: "text-right" },
+];
+
+/** Sorts "unassigned / no due date" last when ascending. */
+const LAST = "\uffff";
+
+function comparators(
+  projects: Project[],
+  users: User[],
+): Record<SortKey, (a: Task, b: Task) => number> {
+  const projectKey = (t: Task) =>
+    projects.find((p) => p.id === t.projectId)?.key ?? "";
+  const assignee = (t: Task) =>
+    users.find((u) => u.id === t.assigneeId)?.name ?? "";
+  return {
+    title: (a, b) => a.title.localeCompare(b.title),
+    project: (a, b) => projectKey(a).localeCompare(projectKey(b)),
+    status: (a, b) =>
+      STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status),
+    priority: (a, b) =>
+      PRIORITY_ORDER.indexOf(a.priority) - PRIORITY_ORDER.indexOf(b.priority),
+    assignee: (a, b) =>
+      (assignee(a) || LAST).localeCompare(assignee(b) || LAST),
+    due: (a, b) => {
+      const x = toDate(a.dueDate)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      const y = toDate(b.dueDate)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      return x - y;
+    },
+  };
+}
+
+function SortHeader({
+  column,
+  sort,
+  onSort,
+}: {
+  column: (typeof COLUMNS)[number];
+  sort: Sort | null;
+  onSort: (key: SortKey) => void;
+}) {
+  const active = sort?.key === column.key;
+  const dir = active ? sort.dir : null;
+  return (
+    <TH
+      scope="col"
+      aria-sort={dir === "asc" ? "ascending" : dir === "desc" ? "descending" : "none"}
+      className={column.className}
+    >
+      <button
+        type="button"
+        onClick={() => onSort(column.key)}
+        className={cn(
+          "inline-flex items-center gap-1 rounded-xs transition-colors hover:text-ink",
+          active && "text-ink",
+        )}
+        title={`Sort by ${column.label.toLowerCase()}`}
+      >
+        {column.label}
+        {dir === "asc" ? (
+          <ArrowUp className="h-3 w-3" aria-hidden />
+        ) : dir === "desc" ? (
+          <ArrowDown className="h-3 w-3" aria-hidden />
+        ) : (
+          <ArrowUpDown className="h-3 w-3 opacity-40" aria-hidden />
+        )}
+      </button>
+    </TH>
   );
 }
 
@@ -188,18 +305,40 @@ export function TaskList({
   users: User[];
   onOpenTask?: (task: Task) => void;
 }) {
+  const [sort, setSort] = useState<Sort | null>(null);
+
+  function toggle(key: SortKey) {
+    setSort((s) =>
+      s?.key === key
+        ? { key, dir: s.dir === "asc" ? "desc" : "asc" }
+        : { key, dir: "asc" },
+    );
+  }
+
+  const rows = useMemo(() => {
+    if (!sort) return tasks;
+    const cmp = comparators(projects, users)[sort.key];
+    const sign = sort.dir === "asc" ? 1 : -1;
+    return [...tasks].sort((a, b) => sign * cmp(a, b));
+  }, [tasks, sort, projects, users]);
+
   return (
     <Table>
+      <caption className="sr-only">
+        {tasks.length} tasks
+        {sort
+          ? `, sorted by ${COLUMNS.find((c) => c.key === sort.key)?.label} ${
+              sort.dir === "asc" ? "ascending" : "descending"
+            }`
+          : ""}
+      </caption>
       <THead>
-        <TH>Task</TH>
-        <TH>Project</TH>
-        <TH>Status</TH>
-        <TH>Priority</TH>
-        <TH>Assignee</TH>
-        <TH className="text-right">Due</TH>
+        {COLUMNS.map((c) => (
+          <SortHeader key={c.key} column={c} sort={sort} onSort={toggle} />
+        ))}
       </THead>
       <tbody>
-        {tasks.map((t) => {
+        {rows.map((t) => {
           const project = projects.find((p) => p.id === t.projectId);
           const assignee = users.find((u) => u.id === t.assigneeId);
           const late = isOverdue(t.dueDate) && t.status !== "done";

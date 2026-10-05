@@ -68,7 +68,9 @@ export function createInMemoryStore(): Store {
       return ensure().projects.find((p) => p.id === id);
     },
     getTasks() {
-      return ensure().tasks;
+      // `order` is the canonical sequence (matches the SQLite adapter's
+      // `ORDER BY ord`), so both adapters hand the UI the same default rows.
+      return [...ensure().tasks].sort((a, b) => a.order - b.order);
     },
     getTask(id) {
       return ensure().tasks.find((t) => t.id === id);

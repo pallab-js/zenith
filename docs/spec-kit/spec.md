@@ -80,8 +80,10 @@ Members mutate tasks/issues they can access; admins+ manage projects and team.
 - FR-5.1 Member list: avatar, name, role, open tasks, overdue, workload bar.
 - FR-5.2 Role change (owner/admin) and remove member (owner).
 - FR-5.3 Workload view: per-member assignment distribution, red flag when > WIP limit (7).
-- FR-5.4 Mock session: a role switcher in the top bar simulates the signed-in user so
-  permission enforcement is demonstrable without real auth.
+- FR-5.4 Mock session: a role switcher in the sidebar (and on `/sign-in`) simulates the
+  signed-in user so permission enforcement is demonstrable without real auth. The picked
+  identity is stored server-side in an httpOnly cookie — the browser can request a seat
+  but cannot edit the session value itself.
 
 ### FR-6 Global
 - FR-6.1 App shell: indigo sidebar (Dashboard, Projects, Tasks, Issues, Team), collapses

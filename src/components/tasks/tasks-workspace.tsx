@@ -55,6 +55,15 @@ export function TasksWorkspace({
 
   const filteredCount = tasks.length;
 
+  /** Every label in use, for the FR-3.3 label filter. */
+  const labels = useMemo(
+    () =>
+      Array.from(new Set(allTasks.flatMap((t) => t.labels))).sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    [allTasks],
+  );
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -81,6 +90,7 @@ export function TasksWorkspace({
       <TaskFilters
         projects={projects}
         users={users}
+        labels={labels}
         count={filteredCount}
         total={allTasks.length}
       />

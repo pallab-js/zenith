@@ -61,6 +61,14 @@ export const STATUS_ORDER: Task["status"][] = [
   "done",
 ];
 
+/** Severity of a priority — index 0 is the loudest (drives sorting too). */
+export const PRIORITY_ORDER: Task["priority"][] = [
+  "urgent",
+  "high",
+  "medium",
+  "low",
+];
+
 export const STATUS_LABEL: Record<Task["status"], string> = {
   backlog: "Backlog",
   todo: "To do",
