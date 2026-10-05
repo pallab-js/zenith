@@ -2,6 +2,8 @@
   "name": "zenith",
   "version": "1.0.0",
   "private": true,
+  "description": "All-in-one command center for software teams — Next.js dashboard with SQLite persistence, server actions and role-based access.",
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
