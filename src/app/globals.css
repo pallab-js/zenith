@@ -1,0 +1,188 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   Zenith design tokens — derived from DESIGN.md (Discord system).
+   Law: no hard-coded hex values in components (constitution §IV).
+   ───────────────────────────────────────────────────────────── */
+
+@theme {
+  /* Colour */
+  --color-canvas: #0a0d3a;
+  --color-surface: #1e2353;
+  --color-onyx: #23272a;
+  --color-black: #000000;
+  --color-primary: #5865f2;
+  --color-primary-soft: #454fb8;
+  --color-green: #35ed7e;
+  --color-magenta: #ec48bd;
+  --color-violet: #7b3ff2;
+  --color-link: #00b0f4;
+  --color-ink: #ffffff;
+  --color-ink-dark: #000000;
+  --color-muted: #333333;
+  --color-hairline: #2f3570;
+
+  /* Derived text opacities on dark surfaces */
+  --color-ink-70: color-mix(in srgb, var(--color-ink) 70%, transparent);
+  --color-ink-55: color-mix(in srgb, var(--color-ink) 55%, transparent);
+  --color-ink-40: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  --color-ink-12: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  --color-ink-06: color-mix(in srgb, var(--color-ink) 6%, transparent);
+
+  /* Font families */
+  --font-display: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+
+  /* Radii — nothing is square */
+  --radius-xs: 6px;
+  --radius-sm: 12px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 40px;
+  --radius-pill: 50px;
+  --radius-jumbo: 120px;
+
+  /* Spacing scale (8px base) */
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-2sm: 12px;
+  --spacing-3sm: 20px;
+
+  /* Elevation — the one permitted glow */
+  --shadow-float: 0 3px 68px rgba(69, 42, 124, 0.1);
+  --shadow-modal: 0 16px 64px rgba(4, 6, 30, 0.55);
+
+  /* Motion */
+  --animate-mesh: mesh 18s ease-in-out infinite;
+  --animate-fade-up: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes mesh {
+  0%,
+  100% {
+    transform: translate3d(-4%, -6%, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(6%, 3%, 0) scale(1.12);
+  }
+  66% {
+    transform: translate3d(-3%, 6%, 0) scale(1.05);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Base ─────────────────────────────────────────────────── */
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-primary);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Scrollbars — quiet, onyx track, surface thumb */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-surface) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-surface);
+  border-radius: var(--radius-pill);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ── Utilities ────────────────────────────────────────────── */
+
+@utility font-head {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+@utility text-eyebrow {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-55);
+}
+
+@utility surface {
+  background: var(--color-surface);
+}
+
+/* Brand gradient mesh wash — used once per view max (constitution §III) */
+@utility brand-mesh {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.brand-mesh::before,
+.brand-mesh::after {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(45% 55% at 20% 25%, color-mix(in srgb, var(--color-primary) 55%, transparent), transparent 70%),
+    radial-gradient(40% 50% at 80% 15%, color-mix(in srgb, var(--color-magenta) 38%, transparent), transparent 70%),
+    radial-gradient(50% 60% at 65% 90%, color-mix(in srgb, var(--color-violet) 45%, transparent), transparent 72%);
+  filter: blur(28px);
+  animation: var(--animate-mesh);
+}
+.brand-mesh::after {
+  inset: -20% -10% -50% -10%;
+  background: linear-gradient(
+    180deg,
+    transparent 35%,
+    color-mix(in srgb, var(--color-canvas) 85%, transparent) 78%,
+    var(--color-canvas) 100%
+  );
+  animation: none;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

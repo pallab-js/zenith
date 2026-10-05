@@ -1,0 +1,7 @@
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
+
+# better-sqlite3 compiles a native binding on install (the SQLite driver).
+onlyBuiltDependencies:
+  - better-sqlite3
