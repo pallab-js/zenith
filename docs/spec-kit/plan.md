@@ -10,7 +10,7 @@ without user approval.
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ UI  ·  App Router pages (RSC) + client islands (board,       │
-│       charts, drawer, palette)  ·  Tailwind 4 design tokens │
+│       charts, drawer)  ·  Tailwind 4 design tokens           │
 ├─────────────────────────────────────────────────────────────┤
 │ Validation  ·  Zod schemas (`lib/schemas`)                  │
 ├─────────────────────────────────────────────────────────────┤

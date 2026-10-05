@@ -42,7 +42,7 @@ export function IssuesWorkspace({
   const pathname = usePathname();
   const canEdit = can(role, "issue:write");
 
-  // URL is the single source of truth (⌘K deep links, back button).
+  // URL is the single source of truth (deep links, back button).
   const drawerId = params.get("issue");
   const createOpen = params.get("new") === "1";
 

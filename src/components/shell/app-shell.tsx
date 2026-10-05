@@ -1,22 +1,15 @@
-import type { Issue, Project, Role, Task, User } from "@/lib/repo/types";
-import { CommandPalette } from "./command-palette";
+import type { Role, User } from "@/lib/repo/types";
 import { Sidebar } from "./sidebar";
 
 export function AppShell({
   members,
   currentUser,
   role,
-  projects,
-  tasks,
-  issues,
   children,
 }: {
   members: { user: User; role: Role }[];
   currentUser: User;
   role: Role;
-  projects: Project[];
-  tasks: Task[];
-  issues: Issue[];
   children: React.ReactNode;
 }) {
   return (
@@ -27,12 +20,6 @@ export function AppShell({
           {children}
         </div>
       </main>
-      <CommandPalette
-        projects={projects}
-        tasks={tasks}
-        issues={issues}
-        role={role}
-      />
     </div>
   );
 }

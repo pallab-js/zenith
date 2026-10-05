@@ -86,10 +86,11 @@ Members mutate tasks/issues they can access; admins+ manage projects and team.
   but cannot edit the session value itself.
 
 ### FR-6 Global
-- FR-6.1 App shell: indigo sidebar (Dashboard, Projects, Tasks, Issues, Team), with the
-  search/⌘K entry point; below `lg` it collapses into a hamburger drawer behind a sticky
-  top bar that keeps the menu and palette buttons.
-- FR-6.2 Command palette: fuzzy jump to pages, projects, tasks, issues; create actions.
+- FR-6.1 App shell: indigo sidebar (Dashboard, Projects, Tasks, Issues, Team); below
+  `lg` it collapses into a hamburger drawer behind a sticky top bar that keeps the menu
+  button.
+- FR-6.2 Command palette (⌘K): **removed** in post-v1 remediation — jump navigation is
+  handled by the sidebar, list links and shareable URL filters.
 - FR-6.3 Toasts on every mutation; empty states on every empty view.
 - FR-6.4 Every mutation writes an `ActivityEvent` and updates the dashboard feed.
 - FR-6.5 Persist to SQLite (`./zenith.db`, better-sqlite3) behind the repo seam; the
@@ -118,7 +119,6 @@ Members mutate tasks/issues they can access; admins+ manage projects and team.
 - US-3 As a contributor I drag my task to *Done* and it is recorded in activity.
 - US-4 As a lead I file a critical issue, link the task, and see it on the dashboard.
 - US-5 As a viewer I can browse everything but see no enabled mutation controls.
-- US-6 As any user I press ⌘K and jump to any project or task in two keystrokes.
 
 ---
 

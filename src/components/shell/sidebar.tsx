@@ -1,6 +1,6 @@
 "use client";
 
-import { Command, LogOut, Menu, X, Zap } from "lucide-react";
+import { LogOut, Menu, X, Zap } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -54,7 +54,6 @@ export function Sidebar({
         <div className="px-1">{brand}</div>
         <NavLinks className="mt-8 flex-1" />
         <div className="mt-4 space-y-3">
-          <PaletteHint />
           {switcher}
         </div>
       </aside>
@@ -63,13 +62,6 @@ export function Sidebar({
       <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-ink-06 bg-canvas/90 px-4 py-3 backdrop-blur lg:hidden">
         {brand}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => window.dispatchEvent(new CustomEvent("zenith:palette"))}
-            className="rounded-sm p-2 text-ink-55 transition hover:bg-ink-06 hover:text-ink"
-            aria-label="Open command palette"
-          >
-            <Command className="h-5 w-5" />
-          </button>
           <button
             onClick={() => setMobileOpen(true)}
             className="rounded-sm p-2 text-ink-55 transition hover:bg-ink-06 hover:text-ink"
@@ -105,24 +97,12 @@ export function Sidebar({
               onNavigate={() => setMobileOpen(false)}
             />
             <div className="mt-4 space-y-3 border-t border-ink-06 pt-4">
-              <PaletteHint />
               {switcher}
             </div>
           </div>
         </div>
       )}
     </>
-  );
-}
-
-function PaletteHint() {
-  return (
-    <p className="hidden items-center gap-2 rounded-sm bg-surface px-3 py-2 text-xs text-ink-50 lg:flex">
-      <Command className="h-3.5 w-3.5" aria-hidden />
-      <span>
-        <kbd className="font-head">⌘K</kbd> to jump anywhere
-      </span>
-    </p>
   );
 }
 

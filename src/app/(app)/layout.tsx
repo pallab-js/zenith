@@ -13,9 +13,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       members={store.getMembers()}
       currentUser={session.user}
       role={session.role}
-      projects={store.getProjects()}
-      tasks={store.getTasks()}
-      issues={store.getIssues()}
     >
       {children}
     </AppShell>

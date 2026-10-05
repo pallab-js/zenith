@@ -35,7 +35,7 @@ export function TasksWorkspace({
   const pathname = usePathname();
   const canEdit = can(role, "task:write");
 
-  // URL is the single source of truth for drawers/deep links (⌘K jumps).
+  // URL is the single source of truth for drawers and deep links.
   const drawerParam = params.get("task");
   const createParam = params.get("new") === "1";
   const [view, setView] = useState<View>("board");

@@ -37,10 +37,8 @@ Reference: `spec.md` FR-x / `constitution.md` §x.
 - [x] 3.2 Top bar: breadcrumb/page title, search, role switcher, avatar
 - [x] 3.3 Responsive: sidebar → drawer < 768px, hamburger trigger
 - [x] 3.4 Toast host + `sonner`-style local toaster
-- [x] 3.5 Command palette (⌘K): pages, projects, tasks, issues, actions
-- [x] 3.6 Mock auth gate: `sign-in` page + role switcher; viewer = read-only enforcement
-- **Gate**: navigate all routes at 375/1280px; palette jumps work; role switch changes
-      enabled controls.
+- [x] 3.5 Mock auth gate: `sign-in` page + role switcher; viewer = read-only enforcement
+- **Gate**: navigate all routes at 375/1280px; role switch changes enabled controls.
 
 ## Phase 4 — Dashboard (FR-1)
 - [x] 4.1 Hero band (canvas + gradient mesh) with page title + date context
@@ -59,7 +57,7 @@ Reference: `spec.md` FR-x / `constitution.md` §x.
 - [x] 5.5 Filters + search in URL params, collapsed disclosure
 - [x] 5.6 Task drawer: fields, edit, linked issues, activity
 - [x] 5.7 Project detail tabs: Board · Issues · Activity
-- **Gate**: US-3, US-6; full lifecycle < 30s (M2).
+- **Gate**: US-3; full lifecycle < 30s (M2).
 
 ## Phase 6 — Issues (FR-4)
 - [x] 6.1 Issue list: severity/status filters, critical-first default sort
@@ -77,7 +75,7 @@ Reference: `spec.md` FR-x / `constitution.md` §x.
 
 ## Phase 8 — Polish (NFR-2/3)
 - [x] 8.1 Empty states on every view (`ex-empty-state-card`)
-- [x] 8.2 Keyboard: focus rings, drawer Esc, palette shortcuts, board ARIA
+- [x] 8.2 Keyboard: focus rings, drawer Esc, board ARIA
 - [x] 8.3 `prefers-reduced-motion` (gradient mesh, chart animation, transitions)
 - [x] 8.4 Responsive sweep at 375/768/1024/1280 — implemented (sidebar → drawer <1024,
       single-column stacking, table overflow wrappers); visual spot-check in a browser
@@ -102,9 +100,8 @@ Reference: `spec.md` FR-x / `constitution.md` §x.
 2. Drag a task across 3 columns → status persists, toast fires, activity feed updates.
 3. Create a critical issue, link a task → dashboard open-issue count increments.
 4. Switch to Viewer → every mutation control disabled/hidden.
-5. ⌘K → type "auth" → lands on the project.
-6. Resize 375px → sidebar becomes drawer; all charts/tables usable.
-7. Restart dev server → data persists in `./zenith.db` (delete it to see the seed
+5. Resize 375px → sidebar becomes drawer; all charts/tables usable.
+6. Restart dev server → data persists in `./zenith.db` (delete it to see the seed
    applied fresh).
 
 ---
@@ -124,9 +121,8 @@ Reference: `spec.md` FR-x / `constitution.md` §x.
       6 timezone regression checks added
 - [ ] 10.6 Spec drift: sortable list view (FR-3.2), label filter (FR-3.3), FR-5.4/FR-6.1/
       FR-6.5 wording corrected
-- [ ] 10.7 Accessibility: native `<dialog>` for modal + command palette (focus trap,
-      Escape, inert background, focus restore), combobox/listbox ARIA on ⌘K, `aria-sort`
-      on list headers, AA-safe `ink-50` body text
+- [ ] 10.7 Accessibility: native `<dialog>` for modals (focus trap, Escape, inert
+      background, focus restore), `aria-sort` on list headers, AA-safe `ink-50` body text
 - [ ] 10.8 Docs: README (persistence, 100 checks, a11y), `plan.md`/`spec.md` corrected,
       this phase recorded
 - [ ] 10.9 Re-run the manual QA script in a browser (no headless Chrome in this

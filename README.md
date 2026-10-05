@@ -47,7 +47,7 @@ seeded on first run. Optional knobs: `ZENITH_DB_PATH` (path or `:memory:`) and
   task linking, resolve/reopen.
 - **Team (`/team`)** — members, roles, workload bars with a WIP limit of 7, and an
   explicit capability matrix.
-- **Global** — ⌘K command palette, toasts, empty states, skeletons, error and 404 pages,
+- **Global** — toasts, empty states, skeletons, error and 404 pages,
   mock role switcher, responsive sidebar → drawer below 1024px.
 
 ### Roles
@@ -139,9 +139,9 @@ Requirements trace: every `FR-*` in `spec.md` has an implementation in `src/`, a
 - Routes smoke-tested at 200: `/`, `/projects`, `/projects/[id]`, `/tasks`, `/issues`,
   `/team`, `/sign-in`, and 404 for unknown paths; filter URLs verified server-side
   (`/tasks?label=mobile` → 5 of 40)
-- Accessibility: modals and the command palette are native `<dialog>` (focus trap,
-  Escape, background inert, focus restore), the palette is a real combobox/listbox,
-  sortable headers expose `aria-sort`, and body text uses the AA-safe `ink-50` token
+- Accessibility: modals are native `<dialog>` (focus trap, Escape, background inert,
+  focus restore), sortable headers expose `aria-sort`, and body text uses the AA-safe
+  `ink-50` token
 
 ---
 
